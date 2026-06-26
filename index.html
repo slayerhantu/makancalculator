@@ -21,18 +21,28 @@
         .btn:hover { background-color: #27ae60; }
         .btn-secondary { background-color: #3498db; }
         .btn-secondary:hover { background-color: #2980b9; }
+        .btn-purple { background-color: #9b59b6; margin-left: 10px; display: none; }
+        .btn-purple:hover { background-color: #8e44ad; }
         
         .tax-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
         .result-box { background: #e8f8f5; border-left: 5px solid #2ecc71; padding: 20px; border-radius: 6px; margin-top: 20px; display: none; }
         
-        /* Bigger Checkbox Styling */
         .checkbox-cell { text-align: center; vertical-align: middle; }
         .checkbox-cell input[type="checkbox"] {
             width: 22px;
             height: 22px;
             cursor: pointer;
-            accent-color: #2ecc71; /* High-contrast green matching theme */
+            accent-color: #2ecc71;
             margin: 5px auto;
+        }
+
+        /* PRINT INTERACTION - Hides interface fluff when downloading picture */
+        @media print {
+            body { background: white; margin: 0; padding: 10px; max-width: 100%; }
+            .card, #copyBtn, .btn, p, .tax-section { display: none !important; }
+            #result { display: block !important; border: none !important; background: white !important; padding: 0 !important; }
+            table { width: 100% !important; border: 1px solid #000 !important; }
+            th, td { padding: 8px !important; border: 1px solid #000 !important; font-size: 12px !important; }
         }
     </style>
 </head>
@@ -40,6 +50,13 @@
 
     <div class="card">
         <h2>1. Group Setup</h2>
+        
+        <!-- NEW BILL DESCRIPTION FIELD -->
+        <div style="margin-bottom: 20px;">
+            <label>Bill Description / Event Name</label>
+            <input type="text" id="billDesc" placeholder="e.g. Dinner at myburgerlab" style="width: 100%;">
+        </div>
+
         <div class="setup-row">
             <div style="flex: 1;">
                 <label>Who paid upfront?</label>
@@ -60,10 +77,12 @@
                 <tr id="tableHeaderRow">
                     <th>Item Description</th>
                     <th style="width: 160px;">Price (MYR)</th>
-                    </tr>
+                    <!-- Dynamic friend columns inject here -->
+                </tr>
             </thead>
             <tbody id="tableBody">
-                </tbody>
+                <!-- Rows inject here -->
+            </tbody>
         </table>
         
         <button class="btn btn-secondary" onclick="addItemRow()">+ Add Item Row</button>
@@ -79,8 +98,9 @@
             </div>
         </div>
         
-        <div style="margin-top: 25px;">
+        <div style="margin-top: 25px; display: flex; align-items: center;">
             <button class="btn" onclick="calculateBill()">Calculate Total & Splits</button>
+            <button id="copyBtn" class="btn btn-purple" onclick="window.print()">📷 Save Receipt Image</button>
         </div>
     </div>
 
@@ -95,14 +115,12 @@
             
             friends = inputStr.split(',').map(name => name.trim()).filter(name => name.length > 0);
             
-            // Rebuild Header
             const headerRow = document.getElementById('tableHeaderRow');
             headerRow.innerHTML = '<th>Item Description</th><th style="width: 160px;">Price (MYR)</th>';
             friends.forEach(friend => {
                 headerRow.innerHTML += `<th class="checkbox-cell">${friend}<br><span style="font-size:0.75em; font-weight:normal; color:#666;">Ate this?</span></th>`;
             });
             
-            // Clear current body and add one initial row
             document.getElementById('tableBody').innerHTML = '';
             addItemRow();
             
@@ -115,7 +133,6 @@
             
             let checkboxes = '';
             friends.forEach((friend, index) => {
-                // Removed 'checked' attribute so checkboxes start empty (unticked) by default
                 checkboxes += `<td class="checkbox-cell"><input type="checkbox" class="friend-check-${index}"></td>`;
             });
             
@@ -131,6 +148,7 @@
             const payer = document.getElementById('payer').value.trim();
             if (!payer) { alert('Please specify who paid upfront.'); return; }
             
+            const billDesc = document.getElementById('billDesc').value.trim() || "Group Bill Split";
             const servicePct = (parseFloat(document.getElementById('servicePct').value) || 0) / 100;
             const taxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
             
@@ -164,19 +182,22 @@
                 }
             });
 
-            let resultsHtml = `<h2>Calculation Breakdown</h2>`;
-            resultsHtml += `<table><tr><th>Summary</th><th>Total Amount</th></tr>`;
-            resultsHtml += `<tr><td>Subtotal</td><td>MYR ${overallSubtotal.toFixed(2)}</td></tr>`;
-            
             const totalService = overallSubtotal * servicePct;
             const totalTax = overallSubtotal * taxPct;
             const grandTotal = overallSubtotal + totalService + totalTax;
+
+            // Injected dynamic Description heading into the output
+            let resultsHtml = `<h2 style="margin-bottom: 5px;">🧾 ${billDesc}</h2>`;
+            resultsHtml += `<p style="margin-top: 0; color: #555; font-size: 0.9em;">Paid upfront by: <b>${payer}</b></p>`;
             
+            resultsHtml += `<table><tr><th>Summary Breakdown</th><th>Total Amount</th></tr>`;
+            resultsHtml += `<tr><td>Subtotal</td><td><b>MYR ${overallSubtotal.toFixed(2)}</b></td></tr>`;
             resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
-            resultsHtml += `<tr style="font-weight:bold; background:#d4edda;"><td>Grand Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></table>`;
+            resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></table>`;
             
-            resultsHtml += `<h3>Final Settlement</h3>`;
+            resultsHtml += `<h3>💰 Final Breakdown (Owed to ${payer})</h3>`;
+            resultsHtml += `<table><thead><tr><th>Friend Name</th><th>Base Share</th><th>Service Chg</th><th>SST Share</th><th style="background:#f2f2f2;">Total Owed</th></tr></thead><tbody>`;
             
             friends.forEach(friend => {
                 const sub = personalSubtotals[friend];
@@ -185,14 +206,23 @@
                 const finalPersonalTotal = sub + sCharge + tax;
                 
                 if (friend.toLowerCase() !== payer.toLowerCase()) {
-                    resultsHtml += `<p><b>${friend}</b> owes ${payer}: <span style="font-size:1.1em; color:#2c3e50;"><b>MYR ${finalPersonalTotal.toFixed(2)}</b></span> <br><span style="color:#777; font-size:0.85em;">(Base: MYR ${sub.toFixed(2)} + Service: MYR ${sCharge.toFixed(2)} + SST: MYR ${tax.toFixed(2)})</span></p>`;
+                    resultsHtml += `<tr>
+                        <td><b>${friend}</b></td>
+                        <td>MYR ${sub.toFixed(2)}</td>
+                        <td>MYR ${sCharge.toFixed(2)}</td>
+                        <td>MYR ${tax.toFixed(2)}</td>
+                        <td style="font-weight:bold; background:#fff3cd;">MYR ${finalPersonalTotal.toFixed(2)}</td>
+                    </tr>`;
                 }
             });
+            resultsHtml += `</tbody></table>`;
 
             const resDiv = document.getElementById('result');
             resDiv.innerHTML = resultsHtml;
             resDiv.style.display = 'block';
             resDiv.scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('copyBtn').style.display = 'inline-block';
         }
     </script>
 </body>
