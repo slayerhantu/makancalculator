@@ -51,7 +51,6 @@
     <div class="card">
         <h2>1. Group Setup</h2>
         
-        <!-- NEW BILL DESCRIPTION FIELD -->
         <div style="margin-bottom: 20px;">
             <label>Bill Description / Event Name</label>
             <input type="text" id="billDesc" placeholder="e.g. Dinner at myburgerlab" style="width: 100%;">
@@ -156,11 +155,17 @@
             const prices = document.querySelectorAll('.item-price');
             
             let personalSubtotals = {};
-            friends.forEach(f => personalSubtotals[f] = 0);
+            let personalItems = {}; // To store item descriptions per person
+            
+            friends.forEach(f => {
+                personalSubtotals[f] = 0;
+                personalItems[f] = [];
+            });
             
             let overallSubtotal = 0;
             
             descs.forEach((node, rowIndex) => {
+                const itemLabel = node.value.trim() || `Item #${rowIndex + 1}`;
                 const price = parseFloat(prices[rowIndex].value) || 0;
                 if (price <= 0) return;
                 
@@ -178,6 +183,7 @@
                     const splitPrice = price / sharedWith.length;
                     sharedWith.forEach(friend => {
                         personalSubtotals[friend] += splitPrice;
+                        personalItems[friend].push(itemLabel); // Track description if ticked
                     });
                 }
             });
@@ -186,7 +192,6 @@
             const totalTax = overallSubtotal * taxPct;
             const grandTotal = overallSubtotal + totalService + totalTax;
 
-            // Injected dynamic Description heading into the output
             let resultsHtml = `<h2 style="margin-bottom: 5px;">🧾 ${billDesc}</h2>`;
             resultsHtml += `<p style="margin-top: 0; color: #555; font-size: 0.9em;">Paid upfront by: <b>${payer}</b></p>`;
             
@@ -196,19 +201,21 @@
             resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></table>`;
             
+            // Refactored Table Header based on user instructions
             resultsHtml += `<h3>💰 Final Breakdown (Owed to ${payer})</h3>`;
-            resultsHtml += `<table><thead><tr><th>Friend Name</th><th>Base Share</th><th>Service Chg</th><th>SST Share</th><th style="background:#f2f2f2;">Total Owed</th></tr></thead><tbody>`;
+            resultsHtml += `<table><thead><tr><th>Friend Name</th><th>Item Description</th><th>Service Chg</th><th>SST Share</th><th style="background:#fff3cd;">Total Owed</th></tr></thead><tbody>`;
             
             friends.forEach(friend => {
                 const sub = personalSubtotals[friend];
                 const sCharge = sub * servicePct;
                 const tax = sub * taxPct;
                 const finalPersonalTotal = sub + sCharge + tax;
+                const itemsListString = personalItems[friend].length > 0 ? personalItems[friend].join(', ') : '<i>None</i>';
                 
                 if (friend.toLowerCase() !== payer.toLowerCase()) {
                     resultsHtml += `<tr>
                         <td><b>${friend}</b></td>
-                        <td>MYR ${sub.toFixed(2)}</td>
+                        <td style="font-size: 0.9em; max-width: 300px; color: #555;">${itemsListString}</td>
                         <td>MYR ${sCharge.toFixed(2)}</td>
                         <td>MYR ${tax.toFixed(2)}</td>
                         <td style="font-weight:bold; background:#fff3cd;">MYR ${finalPersonalTotal.toFixed(2)}</td>
