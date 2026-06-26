@@ -1,0 +1,85 @@
+def split_bill(total_amount, friends, paid_by, individual_shares=None):
+    """
+    Splits a bill among friends.
+    
+    :param total_amount: Float, total cost of the bill
+    :param friends: List of strings, names of all friends involved
+    :param paid_by: String, name of the person who paid the upfront bill
+    :param individual_shares: Dict, optional custom amounts for each person {name: amount}
+    """
+    num_people = len(friends)
+    
+    # 1. Calculate how much everyone *should* pay
+    if individual_shares:
+        # Verify custom shares add up to the total
+        if abs(sum(individual_shares.values()) - total_amount) > 0.01:
+            print("Error: Individual shares do not add up to the total amount!")
+            return
+        shares = individual_shares
+    else:
+        # Split equally
+        equal_share = round(total_amount / num_people, 2)
+        shares = {friend: equal_share for friend in friends}
+        
+    # 2. Calculate net balances (Positive means they are owed money, Negative means they owe)
+    balances = {}
+    for friend in friends:
+        amount_paid = total_amount if friend == paid_by else 0
+        amount_owed = shares.get(friend, 0)
+        balances[friend] = amount_paid - amount_owed
+
+    print("--- Final Balances ---")
+    for friend, bal in balances.items():
+        if bal > 0:
+            print(friend, f"is owed ${bal:.2f}")
+        elif bal < 0:
+            print(friend, f"owes ${abs(bal):.2f}")
+        else:
+            print(friend, "is all settled up!")
+            
+    print("\n--- Optimized Transactions ---")
+    
+    # 3. Settle debts optimally
+    # Separate into debtors and creditors
+    debtors = [[name, bal] for name, bal in balances.items() if bal < 0]
+    creditors = [[name, bal] for name, bal in balances.items() if bal > 0]
+    
+    while debtors and creditors:
+        # Sort to always pair the biggest debtor with the biggest creditor
+        debtors.sort(key=lambda x: x[1])
+        creditors.sort(key=lambda x: x[1], reverse=True)
+        
+        debtor_name, debtor_bal = debtors[0]
+        creditor_name, creditor_bal = creditors[0]
+        
+        # Determine the transfer amount
+        transfer = min(abs(debtor_bal), creditor_bal)
+        print(f"{debtor_name} pays {creditor_name}: ${transfer:.2f}")
+        
+        # Update balances
+        debtors[0][1] += transfer
+        creditors[0][1] -= transfer
+        
+        # Remove settled people (with a small buffer for floating-point issues)
+        if abs(debtors[0][1]) < 0.01:
+            debtors.pop(0)
+        if abs(creditors[0][1]) < 0.01:
+            creditors.pop(0)
+
+# --- EXAMPLE USAGE ---
+
+group = ["Alice", "Bob", "Charlie", "David"]
+
+print("Scenario 1: Splitting a $100 dinner equally. Alice paid.")
+split_bill(total_amount=100, friends=group, paid_by="Alice")
+
+print("\n" + "="*40 + "\n")
+
+print("Scenario 2: Custom splitting (e.g., Bob ordered a steak). Charlie paid.")
+custom_shares = {
+    "Alice": 20,
+    "Bob": 50,      # Bob owes more
+    "Charlie": 15,
+    "David": 15
+}
+split_bill(total_amount=100, friends=group, paid_by="Charlie", individual_shares=custom_shares)
