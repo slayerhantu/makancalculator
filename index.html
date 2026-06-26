@@ -3,116 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Bill Splitter</title>
+    <title>Advanced Group Bill Splitter (MYR)</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f7f6; color: #333; max-width: 500px; margin: 40px auto; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f7f6; color: #333; max-width: 1100px; margin: 40px auto; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h2 { margin-top: 0; color: #2c3e50; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 0.9em; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .row input { flex: 1; }
-        button { background-color: #2ecc71; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        button:hover { background-color: #27ae60; }
-        button.secondary { background-color: #3498db; margin-top: 5px; }
-        button.secondary:hover { background-color: #2980b9; }
-        .result-box { background: #e8f8f5; border-left: 5px solid #2ecc71; padding: 15px; border-radius: 6px; margin-top: 20px; display: none; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
+        .setup-row { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; }
+        .setup-row input { flex: 1; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        
+        .btn { background-color: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; }
+        .btn:hover { background-color: #27ae60; }
+        .btn-secondary { background-color: #3498db; }
+        .btn-secondary:hover { background-color: #2980b9; }
+        
+        .tax-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+        .result-box { background: #e8f8f5; border-left: 5px solid #2ecc71; padding: 20px; border-radius: 6px; margin-top: 20px; display: none; }
+        .checkbox-cell { text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Bill Details</h2>
-        <label>Who paid upfront?</label>
-        <input type="text" id="payer" placeholder="e.g. Alice">
-
-        <label>Is there a service charge?</label>
-        <div class="row">
-            <select id="hasService" onchange="toggleInput('servicePct', this.value)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-            </select>
-            <input type="number" id="servicePct" placeholder="Service % (e.g. 10)" style="display:none;">
-        </div>
-
-        <label>Is there tax?</label>
-        <div class="row">
-            <select id="hasTax" onchange="toggleInput('taxPct', this.value)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-            </select>
-            <input type="number" id="taxPct" placeholder="Tax % (e.g. 7)" style="display:none;">
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>Friends & Items</h2>
-        <div id="friendsContainer">
-            <div class="row">
-                <input type="text" placeholder="Friend's Name" class="friend-name">
-                <input type="number" placeholder="Item Cost ($)" class="friend-cost">
+        <h2>1. Group Setup</h2>
+        <div class="setup-row">
+            <div style="flex: 1;">
+                <label>Who paid upfront?</label>
+                <input type="text" id="payer" placeholder="e.g. Andy" style="width: 100%;">
+            </div>
+            <div style="flex: 2;">
+                <label>All Friends Involved (Separated by commas)</label>
+                <input type="text" id="friendsList" placeholder="Andy, PY, Bob, Azim, JJ" style="width: 100%;" onchange="generateTable()">
             </div>
         </div>
-        <button class="secondary" onclick="addFriendRow()">+ Add Another Friend</button>
-        <button onclick="calculateSplit()">Calculate Split</button>
+        <p style="font-size: 0.85em; color: #666; margin: 0;">* Press Tab or click out of the box after typing names to build your itemized spreadsheet below.</p>
+    </div>
+
+    <div class="card" id="itemsCard" style="display: none;">
+        <h2>2. Itemized Receipts & Splitting</h2>
+        <table id="itemsTable">
+            <thead>
+                <tr id="tableHeaderRow">
+                    <th>Item Description</th>
+                    <th style="width: 160px;">Price (MYR)</th>
+                    </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+        
+        <button class="btn btn-secondary" onclick="addItemRow()">+ Add Item Row</button>
+        
+        <div class="tax-section">
+            <div>
+                <label>Service Charge %</label>
+                <input type="number" id="servicePct" value="10" placeholder="10" style="width: 100px;"> %
+            </div>
+            <div>
+                <label>SST / Tax %</label>
+                <input type="number" id="taxPct" value="6" placeholder="6" style="width: 100px;"> %
+            </div>
+        </div>
+        
+        <div style="margin-top: 25px;">
+            <button class="btn" onclick="calculateBill()">Calculate Total & Splits</button>
+        </div>
     </div>
 
     <div id="result" class="card result-box"></div>
 
     <script>
-        function toggleInput(id, value) {
-            document.getElementById(id).style.display = value === 'yes' ? 'block' : 'none';
+        let friends = [];
+
+        function generateTable() {
+            const inputStr = document.getElementById('friendsList').value;
+            if (!inputStr.trim()) return;
+            
+            friends = inputStr.split(',').map(name => name.trim()).filter(name => name.length > 0);
+            
+            // Rebuild Header
+            const headerRow = document.getElementById('tableHeaderRow');
+            headerRow.innerHTML = '<th>Item Description</th><th style="width: 160px;">Price (MYR)</th>';
+            friends.forEach(friend => {
+                headerRow.innerHTML += `<th class="checkbox-cell">${friend}<br><span style="font-size:0.75em; font-weight:normal; color:#666;">Ate this?</span></th>`;
+            });
+            
+            // Clear current body and add one initial row
+            document.getElementById('tableBody').innerHTML = '';
+            addItemRow();
+            
+            document.getElementById('itemsCard').style.display = 'block';
         }
 
-        function addFriendRow() {
-            const container = document.getElementById('friendsContainer');
-            const row = document.createElement('div');
-            row.className = 'row';
-            row.innerHTML = `
-                <input type="text" placeholder="Friend's Name" class="friend-name">
-                <input type="number" placeholder="Item Cost ($)" class="friend-cost">
+        function addItemRow() {
+            const tbody = document.getElementById('tableBody');
+            const tr = document.createElement('tr');
+            
+            let checkboxes = '';
+            friends.forEach((friend, index) => {
+                checkboxes += `<td class="checkbox-cell"><input type="checkbox" class="friend-check-${index}" checked></td>`;
+            });
+            
+            tr.innerHTML = `
+                <td><input type="text" class="item-desc" placeholder="e.g. myburgerlab(sides)" style="width:100%;"></td>
+                <td><div style="display:flex; align-items:center;"><span>MYR&nbsp;</span><input type="number" step="0.01" class="item-price" placeholder="0.00" style="width:100%;"></div></td>
+                ${checkboxes}
             `;
-            container.appendChild(row);
+            tbody.appendChild(tr);
         }
 
-        function calculateSplit() {
+        function calculateBill() {
             const payer = document.getElementById('payer').value.trim();
-            const hasService = document.getElementById('hasService').value === 'yes';
-            const servicePct = hasService ? (parseFloat(document.getElementById('servicePct').value) || 0) / 100 : 0;
-            const hasTax = document.getElementById('hasTax').value === 'yes';
-            const taxPct = hasTax ? (parseFloat(document.getElementById('taxPct').value) || 0) / 100 : 0;
-
-            const names = document.querySelectorAll('.friend-name');
-            const costs = document.querySelectorAll('.friend-cost');
-
-            if (!payer) { alert('Please enter who paid the bill.'); return; }
-
-            let resultsHtml = `<h3>Grand Totals & Owed Amounts</h3>`;
-            let grandTotal = 0;
-            let breakdownHtml = '';
-
-            names.forEach((node, index) => {
-                const name = node.value.trim();
-                const subtotal = parseFloat(costs[index].value) || 0;
-
-                if (name) {
-                    const itemService = subtotal * servicePct;
-                    const itemTax = subtotal * taxPct;
-                    const totalOwed = subtotal + itemService + itemTax;
-                    grandTotal += totalOwed;
-
-                    if (name.toLowerCase() !== payer.toLowerCase()) {
-                        breakdownHtml += `<p><strong>${name}</strong> owes ${payer}: <b>$${totalOwed.toFixed(2)}</b></p>`;
+            if (!payer) { alert('Please specify who paid upfront.'); return; }
+            
+            const servicePct = (parseFloat(document.getElementById('servicePct').value) || 0) / 100;
+            const taxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
+            
+            const descs = document.querySelectorAll('.item-desc');
+            const prices = document.querySelectorAll('.item-price');
+            
+            let personalSubtotals = {};
+            friends.forEach(f => personalSubtotals[f] = 0);
+            
+            let overallSubtotal = 0;
+            
+            descs.forEach((node, rowIndex) => {
+                const price = parseFloat(prices[rowIndex].value) || 0;
+                if (price <= 0) return;
+                
+                overallSubtotal += price;
+                
+                let sharedWith = [];
+                friends.forEach((friend, fIndex) => {
+                    const isChecked = document.querySelectorAll(`.friend-check-${fIndex}`)[rowIndex].checked;
+                    if (isChecked) {
+                        sharedWith.push(friend);
                     }
+                });
+                
+                if (sharedWith.length > 0) {
+                    const splitPrice = price / sharedWith.length;
+                    sharedWith.forEach(friend => {
+                        personalSubtotals[friend] += splitPrice;
+                    });
                 }
             });
 
-            resultsHtml += `<p><strong>Grand Total Bill:</strong> $${grandTotal.toFixed(2)}</p><hr style="border:0; border-top:1px solid #ddd;">`;
-            resultsHtml += breakdownHtml || '<p>Everyone is settled up!</p>';
+            let resultsHtml = `<h2>Calculation Breakdown</h2>`;
+            resultsHtml += `<table><tr><th>Summary</th><th>Total Amount</th></tr>`;
+            resultsHtml += `<tr><td>Subtotal</td><td>MYR ${overallSubtotal.toFixed(2)}</td></tr>`;
+            
+            const totalService = overallSubtotal * servicePct;
+            const totalTax = overallSubtotal * taxPct;
+            const grandTotal = overallSubtotal + totalService + totalTax;
+            
+            resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
+            resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
+            resultsHtml += `<tr style="font-weight:bold; background:#d4edda;"><td>Grand Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></table>`;
+            
+            resultsHtml += `<h3>Final Settlement</h3>`;
+            
+            friends.forEach(friend => {
+                const sub = personalSubtotals[friend];
+                const sCharge = sub * servicePct;
+                const tax = sub * taxPct;
+                const finalPersonalTotal = sub + sCharge + tax;
+                
+                if (friend.toLowerCase() !== payer.toLowerCase()) {
+                    resultsHtml += `<p><b>${friend}</b> owes ${payer}: <span style="font-size:1.1em; color:#2c3e50;"><b>MYR ${finalPersonalTotal.toFixed(2)}</b></span> <br><span style="color:#777; font-size:0.85em;">(Base: MYR ${sub.toFixed(2)} + Service: MYR ${sCharge.toFixed(2)} + SST: MYR ${tax.toFixed(2)})</span></p>`;
+                }
+            });
 
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = resultsHtml;
-            resultDiv.style.display = 'block';
+            const resDiv = document.getElementById('result');
+            resDiv.innerHTML = resultsHtml;
+            resDiv.style.display = 'block';
+            resDiv.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
