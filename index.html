@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makan Calculator by Andy</title>
-    <!-- Integrated secure html2canvas script library for local photo conversion -->
+    <!-- Secure canvas generator for accurate photo rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -53,16 +53,6 @@
         .friend-checkbox-label input { width: 0; height: 0; opacity: 0; margin: 0; position: absolute; }
         .friend-checkbox-label.selected { background: #e8f8f5; border-color: var(--primary); color: var(--primary-hover); font-weight: 600; box-shadow: 0 2px 4px rgba(46,204,113,0.1); }
         
-        /* Interactive Screen Results Layout Configuration styles */
-        .table-responsive { width: 100%; overflow-x: auto; margin: 16px 0; border-radius: 8px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; background: #fff; }
-        th, td { padding: 12px; text-align: left; font-size: 0.95em; border-bottom: 1px solid var(--border); }
-        th { background-color: #f8fafc; color: #4a5568; font-weight: 600; }
-        
-        .breakdown-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
-        .breakdown-header { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 8px; font-size: 1.05em; }
-        .breakdown-details { font-size: 0.88em; color: #64748b; line-height: 1.5; }
-        
         .btn { background-color: var(--primary); color: white; border: none; padding: 14px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; display: inline-block; transition: background 0.2s; text-align: center; box-sizing: border-box; }
         .btn:hover { background-color: var(--primary-hover); }
         .btn-secondary { background-color: var(--secondary); margin-bottom: 20px; width: auto; }
@@ -71,25 +61,40 @@
         .btn-purple:hover { background-color: var(--accent-hover); }
         
         .tax-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; border-top: 2px solid var(--border); padding-top: 24px; margin-bottom: 24px; }
-        
-        /* Unified Image Wrapper for beautiful rendering view state exports */
-        .result-box { background: #fff; border: 1px solid var(--border); padding: 24px; border-radius: 16px; margin-top: 24px; display: none; }
-        
-        /* Dedicated layout definitions for standard web display grids */
-        .print-layout-wrapper { background: #fff; padding: 10px; border-radius: 12px; }
-        .print-main-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
-        @media (min-width: 600px) {
-            .print-main-grid { grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
-        }
-
-        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 20px; border-radius: 12px; margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
-        @media (min-width: 600px) {
-            .payment-summary-box { flex-direction: row; justify-content: space-between; align-items: center; }
-        }
-        .qr-preview-container { max-width: 150px; text-align: center; margin: 0 auto; }
-        .qr-preview-img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 6px; background: #fff; }
-
         input[type="file"] { padding: 8px; background: #fff; border-style: dashed; cursor: pointer; }
+
+        /* RECEIPT VISUAL CONTAINER STYLES */
+        .result-box { display: none; margin-top: 24px; }
+        
+        /* The container that gets snapshotted */
+        #printArea { background: #ffffff; padding: 30px; border-radius: 16px; border: 2px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        .receipt-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
+        /* Dynamic class that gets activated during image capture to force Side-by-Side */
+        .receipt-grid.force-desktop { grid-template-columns: 1.1fr 0.9fr; }
+
+        .table-responsive { width: 100%; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { padding: 14px; text-align: left; font-size: 1em; border-bottom: 1px solid var(--border); }
+        th { background-color: #f8fafc; color: #4a5568; font-weight: 700; }
+        
+        .breakdown-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .breakdown-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed var(--border); padding-bottom: 12px; margin-bottom: 12px; }
+        .breakdown-header span.name { font-size: 1.2em; font-weight: 800; color: var(--dark); }
+        .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; }
+        .breakdown-details { font-size: 1em; color: #4a5568; line-height: 1.6; }
+        
+        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 20px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .qr-preview-container { max-width: 180px; text-align: center; }
+        .qr-preview-img { width: 160px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
+
+        /* iPHONE POPUP MODAL (Forces visual image display instead of silent download) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 16px; text-align: center; max-width: 95%; max-height: 90%; display: flex; flex-direction: column; }
+        .modal-content img { max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; border: 1px solid #ddd; margin: 15px 0; }
+        .modal-instructions { font-size: 1.1em; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+        .modal-close-btn { background: #e74c3c; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 1em; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -137,9 +142,7 @@
 
     <div class="card" id="itemsCard" style="display: none;">
         <h2>2. Itemized Receipts & Splitting</h2>
-        
         <div id="itemsContainer"></div>
-        
         <button class="btn btn-secondary" onclick="addItemRow()">+ Add Item Row</button>
         
         <div class="tax-section">
@@ -156,8 +159,17 @@
         <button class="btn" onclick="calculateBill()" style="width: 100%;">Calculate Total & Splits</button>
     </div>
 
-    <!-- Target calculation content frame captured by image processor -->
     <div id="result" class="result-box"></div>
+
+    <!-- iPhone Saving Modal -->
+    <div id="photoModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-instructions">📸 Image Ready!</div>
+            <p style="margin:0; font-size:0.9em; color:#555;">Long-press the receipt below and select <b>"Save to Photos"</b></p>
+            <img id="finalGeneratedImage" src="" alt="Generated Receipt">
+            <button class="modal-close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
 
     <script>
         let friends = [];
@@ -173,6 +185,10 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        function closeModal() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
 
         function handleSetupChange() {
             const payerInput = document.getElementById('payer').value.trim();
@@ -267,39 +283,49 @@
             }
         }
 
-        // RE-ENGINEERED EXPORT: Uses Canvas generation to export a high-res photo asset directly
         function captureAndDownloadPhoto() {
-            const billDesc = document.getElementById('billDesc').value.trim() || "Makan_Breakdown";
-            const targetElement = document.getElementById('printArea');
             const actionButton = document.getElementById('copyBtn');
+            const printTarget = document.getElementById('printArea');
+            const gridTarget = document.getElementById('receiptGrid');
             
-            // Temporary hidden visual optimization during processing states
-            actionButton.style.opacity = "0";
+            actionButton.innerText = "⏳ Generating Photo...";
+            
+            // 1. Force the wrapper to act like a wide desktop screen temporarily
+            const originalWidth = printTarget.style.width;
+            printTarget.style.width = '850px';
+            printTarget.style.maxWidth = 'none';
+            
+            // 2. Force the Side-by-Side layout explicitly via CSS class
+            gridTarget.classList.add('force-desktop');
 
-            // Enforce explicit desktop sizing overrides inside canvas layout context for perfect alignment
-            html2canvas(targetElement, {
-                useCORS: true,
-                allowTaint: true,
-                scale: 2, // Generates high-definition sharpness for perfect reading and QR scans
+            // 3. Take snapshot exactly as styled
+            html2canvas(printTarget, {
+                scale: 2, // Double resolution for crystal clear text and QR scans
                 backgroundColor: "#ffffff",
-                windowWidth: 800 // Forces the elegant dual-column alignment blueprint regardless of phone viewport size
+                useCORS: true,
+                logging: false,
+                onclone: function (clonedDoc) {
+                    // Ensures the snapshot clone maintains the forced sizes
+                    clonedDoc.getElementById('printArea').style.width = '850px';
+                }
             }).then(canvas => {
+                // 4. Revert screen layout back to mobile friendly size
+                printTarget.style.width = originalWidth;
+                gridTarget.classList.remove('force-desktop');
+                
                 const imagePathUrl = canvas.toDataURL("image/png");
                 
-                // Programmatically trigger a clean asset download link
-                const temporaryDownloadAnchor = document.createElement('a');
-                temporaryDownloadAnchor.href = imagePathUrl;
-                temporaryDownloadAnchor.download = `${billDesc.replace(/\s+/g, '_')}_Receipt.png`;
-                document.body.appendChild(temporaryDownloadAnchor);
-                temporaryDownloadAnchor.click();
-                document.body.removeChild(temporaryDownloadAnchor);
+                // 5. Display inside the iPhone-friendly Modal
+                document.getElementById('finalGeneratedImage').src = imagePathUrl;
+                document.getElementById('photoModal').style.display = 'flex';
                 
-                // Revert interface interaction button transparency back to normal
-                actionButton.style.opacity = "1";
+                actionButton.innerText = "📷 Save Receipt Image (PNG)";
             }).catch(error => {
-                console.error("Canvas engine rendering failed:", error);
-                actionButton.style.opacity = "1";
-                alert("Failed to render image. You can still take a normal screenshot!");
+                console.error("Canvas failed:", error);
+                actionButton.innerText = "📷 Save Receipt Image (PNG)";
+                printTarget.style.width = originalWidth;
+                gridTarget.classList.remove('force-desktop');
+                alert("Failed to render image.");
             });
         }
 
@@ -354,14 +380,14 @@
             const totalTax = overallSubtotal * taxPct;
             const grandTotal = overallSubtotal + totalService + totalTax;
 
-            // Enclose elements inside an isolation div container block for canvas scanning accuracy
-            let resultsHtml = `<div id="printArea" class="print-layout-wrapper">`;
-            resultsHtml += `<h2 style="text-align:center; font-size:1.6em; margin-bottom:4px; font-weight:bold;">🧾 ${billDesc}</h2>`;
-            resultsHtml += `<p style="text-align:center; color: #64748b; font-size: 0.9em; margin-top:0; margin-bottom:24px;">Calculated via Makan Calculator by Andy | Paid by: <b>${payer}</b></p>`;
+            let resultsHtml = `<div id="printArea">`;
+            resultsHtml += `<h2 style="text-align:center; font-size:1.8em; margin-bottom:4px; font-weight:800; border-bottom:3px solid var(--dark); padding-bottom:10px;">🧾 ${billDesc}</h2>`;
+            resultsHtml += `<p style="text-align:center; color: #64748b; font-size: 1.1em; margin-top:10px; margin-bottom:30px;">Calculated via Makan Calculator | Paid by: <b style="color:var(--dark);">${payer}</b></p>`;
             
-            resultsHtml += `<div class="print-main-grid">`;
+            // The Grid that gets forced Side-by-Side during snapshot
+            resultsHtml += `<div id="receiptGrid" class="receipt-grid">`;
 
-            // Left Column Segment
+            // Left Side Data
             resultsHtml += `<div>`;
             resultsHtml += `<div class="table-responsive"><h3>📋 Item Details</h3><table><thead><tr><th>Item Description</th><th>Price</th><th>Shared By</th></tr></thead><tbody>`;
             if(receiptItemsLogged.length === 0) {
@@ -377,12 +403,12 @@
             resultsHtml += `<tr><td>Subtotal</td><td><b>MYR ${overallSubtotal.toFixed(2)}</b></td></tr>`;
             resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
-            resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
+            resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td style="font-size:1.2em;">MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
             resultsHtml += `</div>`; 
 
-            // Right Column Segment (Enlarged Owed Cards + Bold Metrics text patterns)
+            // Right Side Data
             resultsHtml += `<div>`;
-            resultsHtml += `<h3>💰 Final Breakdown (Pay to var)</h3>`;
+            resultsHtml += `<h3>💰 Final Breakdown (Pay to ${payer})</h3>`;
             
             friends.forEach(friend => {
                 const sub = personalSubtotals[friend];
@@ -395,12 +421,12 @@
                     resultsHtml += `
                         <div class="breakdown-card">
                             <div class="breakdown-header">
-                                <span>${friend}</span>
-                                <span style="font-size:1.2em; font-weight:800; color:#e67e22;">RM ${finalPersonalTotal.toFixed(2)}</span>
+                                <span class="name">${friend}</span>
+                                <span class="amt">RM ${finalPersonalTotal.toFixed(2)}</span>
                             </div>
                             <div class="breakdown-details">
-                                <b>Items:</b> ${itemsListString}<br>
-                                <span style="font-size:0.9em; color:#4a5568;"><b>Service Charge:</b> RM ${sCharge.toFixed(2)} | <b>SST:</b> RM ${tax.toFixed(2)}</span>
+                                <b style="color:var(--dark);">Items:</b> ${itemsListString}<br>
+                                <span style="font-size:0.95em; color:#4a5568; margin-top:6px; display:block;"><b>Service Charge:</b> RM ${sCharge.toFixed(2)} | <b>SST:</b> RM ${tax.toFixed(2)}</span>
                             </div>
                         </div>
                     `;
@@ -416,23 +442,23 @@
             if (holderName || bankDetails || phoneDetails || qrDataUrl) {
                 resultsHtml += `<div class="payment-summary-box">`;
                 resultsHtml += `<div style="flex: 1; min-width: 240px;">`;
-                resultsHtml += `<h3 style="margin-bottom:8px;">📌 Payment Transfer to ${payer}</h3>`;
-                if (holderName)  resultsHtml += `<p style="margin:4px 0;"><b>Account Name:</b> ${holderName}</p>`;
-                if (bankDetails)  resultsHtml += `<p style="margin:4px 0;"><b>Bank Details:</b> ${bankDetails}</p>`;
-                if (phoneDetails) resultsHtml += `<p style="margin:4px 0;"><b>DuitNow / TNG:</b> ${phoneDetails}</p>`;
+                resultsHtml += `<h3 style="margin-bottom:12px;">📌 Payment Transfer to ${payer}</h3>`;
+                if (holderName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account Name:</b> ${holderName}</p>`;
+                if (bankDetails)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Bank Details:</b> ${bankDetails}</p>`;
+                if (phoneDetails) resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>DuitNow / TNG:</b> ${phoneDetails}</p>`;
                 resultsHtml += `</div>`;
                 
                 if (qrDataUrl) {
-                    resultsHtml += `<div class="qr-preview-container" style="max-width:180px;">`;
-                    resultsHtml += `<span style="font-size:0.85em; font-weight:700; color:#2c3e50; display:block; margin-bottom:4px;">Scan to Pay</span>`;
-                    resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" style="width:160px; height:auto; border:1px solid var(--border);" alt="Payment QR Code">`;
+                    resultsHtml += `<div class="qr-preview-container">`;
+                    resultsHtml += `<label style="font-size:1.1em; font-weight:800; color:var(--dark); margin-bottom:6px;">Scan to Pay</label>`;
+                    resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" alt="Payment QR Code">`;
                     resultsHtml += `</div>`;
                 }
                 resultsHtml += `</div>`;
             }
-            resultsHtml += `</div>`; // Close isolation printArea
+            resultsHtml += `</div>`; 
 
-            // The button action now natively converts the code structure into an image download sequence
+            // Renders the button outside the printArea div so it is not included in the final photo snapshot
             resultsHtml += `<button id="copyBtn" class="btn btn-purple" onclick="captureAndDownloadPhoto()">📷 Save Receipt Image (PNG)</button>`;
 
             const resDiv = document.getElementById('result');
