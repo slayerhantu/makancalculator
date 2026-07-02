@@ -31,6 +31,27 @@
         
         input::placeholder { font-size: 0.82em; color: #a0aec0; }
 
+        /* LANDING PAGE UI STYLES */
+        #landingPage { display: flex; flex-direction: column; gap: 24px; }
+        .welcome-hero { text-align: center; padding: 20px 0 10px 0; }
+        .welcome-hero h1 { font-size: 2.2em; color: var(--dark); margin: 0 0 8px 0; font-weight: 800; }
+        .welcome-hero p { font-size: 1.1em; color: #64748b; margin: 0; }
+        
+        .story-box { background: #e8f4fd; border-left: 4px solid var(--secondary); padding: 18px; border-radius: 8px; font-size: 0.95em; color: #34495e; line-height: 1.6; }
+        
+        .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .changelog-box h3 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; font-size: 1.1em; }
+        .changelog-item { margin-bottom: 14px; }
+        .changelog-item:last-child { margin-bottom: 0; }
+        .changelog-title { font-weight: 700; font-size: 0.95em; display: flex; align-items: center; gap: 6px; color: var(--dark); }
+        .changelog-desc { font-size: 0.88em; color: #64748b; margin-top: 2px; padding-left: 24px; }
+
+        .start-btn { display: block; width: 100%; padding: 16px; font-size: 1.2em; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 4px 12px rgba(46,204,113,0.2); }
+        .start-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+        /* MAIN APP UI (Hidden initially) */
+        #mainApp { display: none; }
+
         .setup-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
         @media (min-width: 600px) {
             .setup-grid { grid-template-columns: repeat(2, 1fr); }
@@ -65,12 +86,9 @@
 
         /* RECEIPT VISUAL CONTAINER STYLES */
         .result-box { display: none; margin-top: 24px; }
-        
-        /* The container that gets snapshotted */
         #printArea { background: #ffffff; padding: 30px; border-radius: 16px; border: 2px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
         .receipt-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
-        /* Dynamic class that gets activated during image capture to force Side-by-Side */
         .receipt-grid.force-desktop { grid-template-columns: 1.1fr 0.9fr; }
 
         .table-responsive { width: 100%; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
@@ -84,14 +102,12 @@
         .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; }
         .breakdown-details { font-size: 1em; color: #4a5568; line-height: 1.6; }
         
-        /* UPDATED: Flex-wrap ensures it adapts to small screens without breaking the dashed box */
         .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 24px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; text-align: left; gap: 20px; }
         
-        /* UPDATED: margin-left: auto ensures it stays bottom-right if it stacks on mobile */
         .qr-preview-container { max-width: 200px; text-align: center; flex-shrink: 0; margin-left: auto; }
         .qr-preview-img { width: 140px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
 
-        /* iPHONE POPUP MODAL (Forces visual image display instead of silent download) */
+        /* iPHONE POPUP MODAL */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
         .modal-content { background: #fff; padding: 20px; border-radius: 16px; text-align: center; max-width: 95%; max-height: 90%; display: flex; flex-direction: column; }
         .modal-content img { max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; border: 1px solid #ddd; margin: 15px 0; }
@@ -101,67 +117,112 @@
 </head>
 <body>
 
-    <div class="card">
-        <h2>Makan Calculator by Andy</h2>
-        
-        <div class="setup-grid">
-            <div class="full-width-md">
-                <label>Bill Description / Event Name</label>
-                <input type="text" id="billDesc" placeholder="e.g. Dinner at myburgerlab">
+    <!-- SECTION 1: LANDING PAGE -->
+    <div id="landingPage" class="card">
+        <div class="welcome-hero">
+            <h1>Welcome to Makan Calculator</h1>
+            <p>by Andy</p>
+        </div>
+
+        <div class="story-box">
+            We’ve all been there. You have an amazing meal with friends, the laughter is flowing, and then... 
+            the bill arrives. Suddenly, everyone pulls out their phones, someone forgot who ordered what, 
+            the tax and service charges get completely mixed up, and you realize you forgot to write down one person's name entirely. 
+            Makan Calculator fixes all of that. No more spreadsheet headaches or chasing people down—just a beautiful, 
+            fair, and transparent layout everyone can easily understand. Let's make bill-splitting simple!
+        </div>
+
+        <div class="changelog-box">
+            <h3>🚀 What's New!</h3>
+            
+            <div class="changelog-item">
+                <div class="changelog-title">📸 Save directly as a Photo (No more PDFs!)</div>
+                <div class="changelog-desc">You can now save your final bill breakdown as a crystal-clear image straight to your phone's photo gallery! Perfect for dropping right into the group chat.</div>
             </div>
-            <div>
-                <label>Who paid upfront?</label>
-                <input type="text" id="payer" placeholder="e.g. Andy" oninput="handleSetupChange()">
+
+            <div class="changelog-item">
+                <div class="changelog-title">➕ Add Friends Anytime</div>
+                <div class="changelog-desc">Forgot to include someone? You can now type a new name into the box mid-way through calculating. It will instantly add them without erasing any items or prices you've already filled out!</div>
             </div>
-            <div>
-                <label>All Friends Involved (Separated by commas) <span style="font-weight:normal; color:#e74c3c;">(exclude payer)</span></label>
-                <input type="text" id="friendsList" placeholder="PY, Bob, Azim, JJ" oninput="handleSetupChange()">
+
+            <div class="changelog-item">
+                <div class="changelog-title">🏦 Easier Payment Setup & QR Uploads</div>
+                <div class="changelog-desc">Bank Name and Account Number now have separate boxes for lightning-fast entries. Plus, you can now upload your own payment QR code directly into the app so your friends can scan and pay seamlessly.</div>
+            </div>
+
+            <div class="changelog-item">
+                <div class="changelog-title">✨ Beautiful Mobile Layout</div>
+                <div class="changelog-desc">Your payment details sit cleanly on the left with your QR code dynamic on the right. It automatically wraps and auto-aligns on any phone screen without overflowing!</div>
             </div>
         </div>
 
-        <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
-            <label style="color: var(--dark); font-size: 1em;">💰 Payer Payment Details & QR Code (Optional)</label>
-            <div class="payment-grid">
-                <div>
-                    <label>Account Holder Name</label>
-                    <input type="text" id="payeeName" placeholder="e.g. Chan Chee Weng">
-                </div>
-                <div>
-                    <label>Bank Name</label>
-                    <input type="text" id="bankName" placeholder="e.g. Maybank">
-                </div>
-                <div>
-                    <label>Account Number</label>
-                    <input type="text" id="accNum" placeholder="e.g. 1122334455">
-                </div>
-                <div>
-                    <label>Upload Payment QR</label>
-                    <input type="file" id="qrUpload" accept="image/*">
-                </div>
-            </div>
-        </div>
+        <button class="start-btn" onclick="startApp()">Start Splitting 🍽️</button>
     </div>
 
-    <div class="card" id="itemsCard" style="display: none;">
-        <h2>2. Itemized Receipts & Splitting</h2>
-        <div id="itemsContainer"></div>
-        <button class="btn btn-secondary" onclick="addItemRow()">+ Add Item Row</button>
-        
-        <div class="tax-section">
-            <div>
-                <label>Service Charge (%)</label>
-                <input type="number" id="servicePct" value="10">
+    <!-- SECTION 2: MAIN CALCULATOR APPLICATION -->
+    <div id="mainApp">
+        <div class="card">
+            <h2>Makan Calculator by Andy</h2>
+            
+            <div class="setup-grid">
+                <div class="full-width-md">
+                    <label>Bill Description / Event Name</label>
+                    <input type="text" id="billDesc" placeholder="e.g. Dinner at myburgerlab">
+                </div>
+                <div>
+                    <label>Who paid upfront?</label>
+                    <input type="text" id="payer" placeholder="e.g. Andy" oninput="handleSetupChange()">
+                </div>
+                <div>
+                    <label>All Friends Involved (Separated by commas) <span style="font-weight:normal; color:#e74c3c;">(exclude payer)</span></label>
+                    <input type="text" id="friendsList" placeholder="PY, Bob, Azim, JJ" oninput="handleSetupChange()">
+                </div>
             </div>
-            <div>
-                <label>SST (%)</label>
-                <input type="number" id="taxPct" value="6">
+
+            <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
+                <label style="color: var(--dark); font-size: 1em;">💰 Payer Payment Details & QR Code (Optional)</label>
+                <div class="payment-grid">
+                    <div>
+                        <label>Account Holder Name</label>
+                        <input type="text" id="payeeName" placeholder="e.g. Chan Chee Weng">
+                    </div>
+                    <div>
+                        <label>Bank Name</label>
+                        <input type="text" id="bankName" placeholder="e.g. Maybank">
+                    </div>
+                    <div>
+                        <label>Account Number</label>
+                        <input type="text" id="accNum" placeholder="e.g. 1122334455">
+                    </div>
+                    <div>
+                        <label>Upload Payment QR</label>
+                        <input type="file" id="qrUpload" accept="image/*">
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <button class="btn" onclick="calculateBill()" style="width: 100%;">Calculate Total & Splits</button>
-    </div>
 
-    <div id="result" class="result-box"></div>
+        <div class="card" id="itemsCard" style="display: none;">
+            <h2>2. Itemized Receipts & Splitting</h2>
+            <div id="itemsContainer"></div>
+            <button class="btn btn-secondary" onclick="addItemRow()">+ Add Item Row</button>
+            
+            <div class="tax-section">
+                <div>
+                    <label>Service Charge (%)</label>
+                    <input type="number" id="servicePct" value="10">
+                </div>
+                <div>
+                    <label>SST (%)</label>
+                    <input type="number" id="taxPct" value="6">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="calculateBill()" style="width: 100%;">Calculate Total & Splits</button>
+        </div>
+
+        <div id="result" class="result-box"></div>
+    </div>
 
     <!-- iPhone Saving Modal -->
     <div id="photoModal" class="modal-overlay">
@@ -176,6 +237,12 @@
     <script>
         let friends = [];
         let qrDataUrl = ""; 
+
+        // Landing Page Router view execution trigger
+        function startApp() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+        }
 
         document.getElementById('qrUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -435,7 +502,6 @@
             
             if (holderName || bankName || accNum || qrDataUrl) {
                 resultsHtml += `<div class="payment-summary-box">`;
-                // UPDATED: Added word-break so long account numbers don't push the layout out
                 resultsHtml += `<div style="flex: 1; min-width: 200px; word-break: break-word;">`;
                 resultsHtml += `<h3 style="margin-top:0; margin-bottom:12px;">📌 Payment Transfer to ${payer}</h3>`;
                 if (holderName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account Name:</b> ${holderName}</p>`;
