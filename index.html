@@ -42,7 +42,7 @@
         .story-box p:last-child { margin-bottom: 0; }
         
         .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+        .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
         .changelog-box h3 { margin-bottom: 0; font-size: 1.1em; }
         .version-stamp { font-size: 0.78em; color: #a0aec0; font-weight: 500; }
         .changelog-item { margin-bottom: 14px; }
@@ -50,7 +50,7 @@
         .changelog-title { font-weight: 700; font-size: 0.95em; display: flex; align-items: center; gap: 6px; color: var(--dark); }
         .changelog-desc { font-size: 0.88em; color: #64748b; margin-top: 2px; padding-left: 24px; }
 
-        .features-list { margin-top: 16px; padding-left: 20px; font-size: 0.9em; color: #4a5568; }
+        .features-list { margin-top: 12px; padding-left: 20px; font-size: 0.9em; color: #4a5568; }
         .features-list li { margin-bottom: 6px; }
 
         .start-btn { display: block; width: 100%; padding: 16px; font-size: 1.2em; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 4px 12px rgba(46,204,113,0.2); }
@@ -133,7 +133,7 @@
 
         <div class="story-box">
             <p>We’ve all been there. You have a great meal with friends, the laughter is flowing, and then... the bill arrives. Suddenly, everyone pulls out calculators, math gets confusing, and someone always gets forgotten.</p>
-            <p>Makan Calculator fixes that. This app introduces a **fair and stress-free bill splitting solution** that handles service charges, calculates exact individual shares, and eliminates group chat awkwardness completely.</p>
+            <p>Makan Calculator fixes that. This app introduces a <b>fair and stress-free bill splitting solution</b> that handles service charges, calculates exact individual shares, and eliminates group chat awkwardness completely.</p>
         </div>
 
         <div class="changelog-box">
@@ -164,10 +164,10 @@
 
             <h4 style="margin: 20px 0 8px 0; font-size: 0.95em; color: var(--dark);">💡 Standout Features You’ll Love:</h4>
             <ul class="features-list">
-                <li>🎨 **Modern Aesthetic:** A sleek interface tailored for clean viewing on smartphones.</li>
-                <li>⚙️ **Automated Fee Math:** Keeps Service Charges and SST tax splits strictly accurate down to the cent.</li>
-                <li>🔒 **Zero Data Logging:** Everything runs securely and locally right in your phone's web browser.</li>
-                <li>💬 **Chat Ready:** Designed specifically to produce quick visual summaries made for copying into messaging apps.</li>
+                <li>🎨 <b>Modern Aesthetic:</b> A sleek interface tailored for clean viewing on smartphones.</li>
+                <li>⚙️ <b>Automated Fee Math:</b> Keeps Service Charges and SST tax splits strictly accurate down to the cent.</li>
+                <li>🔒 <b>Zero Data Logging:</b> Everything runs securely and locally right in your phone's web browser.</li>
+                <li>💬 <b>Chat Ready:</b> Designed specifically to produce quick visual summaries made for copying into messaging apps.</li>
             </ul>
         </div>
 
@@ -186,7 +186,7 @@
                 </div>
                 <div>
                     <label>Who paid upfront?</label>
-                    <input type="text" id="payer" placeholder="e.g. Jackie Chan" oninput="handleSetupChange()">
+                    <input type="text" id="payer" placeholder="e.g. Siti Nurhaliza" oninput="handleSetupChange()">
                 </div>
                 <div>
                     <label>All Friends Involved (Separated by commas) <span style="font-weight:normal; color:#e74c3c;">(exclude payer)</span></label>
