@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Group Bill Splitter (MYR)</title>
+    <title>Makan Calculator by Andy</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f7f6; color: #333; max-width: 1100px; margin: 20px auto; padding: 15px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -11,7 +11,6 @@
         label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95em; }
         input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; width: 100%; }
         
-        /* Mobile-friendly flexible row system */
         .setup-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
         @media (min-width: 600px) {
             .setup-grid { grid-template-columns: repeat(2, 1fr); }
@@ -20,10 +19,9 @@
 
         .payment-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 10px; }
         @media (min-width: 600px) {
-            .payment-grid { grid-template-columns: repeat(3, 1fr); }
+            .payment-grid { grid-template-columns: repeat(4, 1fr); }
         }
         
-        /* Scrollable container for tables on tiny screens */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: left; font-size: 0.95em; }
@@ -42,7 +40,9 @@
         .tax-section input { width: 100px; display: inline-block; }
         
         .result-box { background: #e8f8f5; border-left: 5px solid #2ecc71; padding: 20px; border-radius: 6px; margin-top: 20px; display: none; }
-        .payment-summary-box { background: #fff; border: 2px dashed #3498db; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .payment-summary-box { background: #fff; border: 2px dashed #3498db; padding: 15px; border-radius: 8px; margin-top: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; }
+        .qr-preview-container { max-width: 180px; text-align: center; }
+        .qr-preview-img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #ccc; display: block; margin-top: 5px; }
 
         .checkbox-cell { text-align: center; vertical-align: middle; }
         .checkbox-cell input[type="checkbox"] {
@@ -54,7 +54,8 @@
             display: block;
         }
 
-        /* PRINT / SCREENSHOT OPTIMIZATION */
+        input[type="file"] { padding: 6px; background: #fafafa; }
+
         @media print {
             body { background: white; margin: 0; padding: 10px; max-width: 100%; }
             .card, #copyBtn, .btn, p, .tax-section, .btn-secondary { display: none !important; }
@@ -68,7 +69,7 @@
 <body>
 
     <div class="card">
-        <h2>1. Group Setup</h2>
+        <h2>Makan Calculator by Andy</h2>
         
         <div class="setup-grid">
             <div class="full-width-md">
@@ -86,7 +87,7 @@
         </div>
 
         <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-            <label style="color: #34495e;">💰 Payer Payment Details (Optional)</label>
+            <label style="color: #34495e;">💰 Payer Payment Details & QR Code (Optional)</label>
             <div class="payment-grid">
                 <div>
                     <input type="text" id="payeeName" placeholder="Account Holder Name">
@@ -96,6 +97,9 @@
                 </div>
                 <div>
                     <input type="text" id="tngDuitnow" placeholder="TNG / DuitNow Phone Number">
+                </div>
+                <div>
+                    <input type="file" id="qrUpload" accept="image/*" placeholder="Upload QR Code">
                 </div>
             </div>
         </div>
@@ -110,11 +114,9 @@
                     <tr id="tableHeaderRow">
                         <th>Item Description</th>
                         <th style="width: 140px;">Price (MYR)</th>
-                        <!-- Dynamic columns attach here -->
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Dynamic rows attach here -->
                 </tbody>
             </table>
         </div>
@@ -142,6 +144,18 @@
 
     <script>
         let friends = [];
+        let qrDataUrl = ""; 
+
+        document.getElementById('qrUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    qrDataUrl = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         function generateTable() {
             const payerInput = document.getElementById('payer').value.trim();
@@ -149,7 +163,6 @@
             
             if (!payerInput) return;
             
-            // Build the collective tracking list: Payer is automatically added first
             friends = [payerInput];
             
             if (inputStr) {
@@ -190,7 +203,7 @@
             const payer = document.getElementById('payer').value.trim();
             if (!payer) { alert('Please specify who paid upfront.'); return; }
             
-            const billDesc = document.getElementById('billDesc').value.trim() || "Group Bill Split";
+            const billDesc = document.getElementById('billDesc').value.trim() || "Makan Breakdown";
             const servicePct = (parseFloat(document.getElementById('servicePct').value) || 0) / 100;
             const taxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
             
@@ -236,7 +249,7 @@
             const grandTotal = overallSubtotal + totalService + totalTax;
 
             let resultsHtml = `<h2 style="margin-bottom: 5px;">🧾 ${billDesc}</h2>`;
-            resultsHtml += `<p style="margin-top: 0; color: #555; font-size: 0.9em;">Paid upfront by: <b>${payer}</b></p>`;
+            resultsHtml += `<p style="margin-top: 0; color: #555; font-size: 0.9em;">Calculated via Makan Calculator by Andy | Paid by: <b>${payer}</b></p>`;
             
             resultsHtml += `<div class="table-responsive"><table><tr><th>Summary Breakdown</th><th>Total Amount</th></tr>`;
             resultsHtml += `<tr><td>Subtotal</td><td><b>MYR ${overallSubtotal.toFixed(2)}</b></td></tr>`;
@@ -266,17 +279,25 @@
             });
             resultsHtml += `</tbody></table></div>`;
 
-            // Collect Payment Data to build bottom display slip
             const holderName = document.getElementById('payeeName').value.trim();
             const bankDetails = document.getElementById('bankInfo').value.trim();
             const phoneDetails = document.getElementById('tngDuitnow').value.trim();
             
-            if (holderName || bankDetails || phoneDetails) {
+            if (holderName || bankDetails || phoneDetails || qrDataUrl) {
                 resultsHtml += `<div class="payment-summary-box">`;
+                resultsHtml += `<div style="flex: 1; min-width: 250px;">`;
                 resultsHtml += `<h3>📌 Payment Transfer Instruction</h3>`;
-                if (holderName)  resultsHtml += `<p style="margin: 4px 0;"><b>Account Holder Name:</b> ${holderName}</p>`;
-                if (bankDetails)  resultsHtml += `<p style="margin: 4px 0;"><b>Bank Account Details:</b> ${bankDetails}</p>`;
-                if (phoneDetails) resultsHtml += `<p style="margin: 4px 0;"><b>DuitNow / Touch 'n Go Number:</b> ${phoneDetails}</p>`;
+                if (holderName)  resultsHtml += `<p style="margin: 6px 0;"><b>Account Holder Name:</b> ${holderName}</p>`;
+                if (bankDetails)  resultsHtml += `<p style="margin: 6px 0;"><b>Bank Account Details:</b> ${bankDetails}</p>`;
+                if (phoneDetails) resultsHtml += `<p style="margin: 6px 0;"><b>DuitNow / Touch 'n Go Number:</b> ${phoneDetails}</p>`;
+                resultsHtml += `</div>`;
+                
+                if (qrDataUrl) {
+                    resultsHtml += `<div class="qr-preview-container">`;
+                    resultsHtml += `<label style="margin-bottom: 2px;">Scan to Pay</label>`;
+                    resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" alt="Payment QR Code">`;
+                    resultsHtml += `</div>`;
+                }
                 resultsHtml += `</div>`;
             }
 
