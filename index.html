@@ -45,7 +45,6 @@
         .item-inputs .desc-input-box { flex: 1.5; }
         .item-inputs .price-container { flex: 1; display: flex; align-items: center; background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding-left: 12px; }
         .item-inputs .price-container input { border: none; background: transparent; padding: 12px 12px 12px 4px; }
-        .item-inputs .price-container input:focus { box-shadow: none; background: transparent; }
         
         .friend-checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px dashed var(--border); padding-top: 12px; }
         .friend-checkbox-label { display: inline-flex; align-items: center; background: white; border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 0.88em; transition: all 0.15s; font-weight: 500; }
@@ -80,35 +79,44 @@
 
         input[type="file"] { padding: 8px; background: #fff; border-style: dashed; cursor: pointer; }
 
-        .print-side-grid { display: block; }
+        .print-layout-wrapper { display: block; }
+        .print-main-grid { display: block; }
+        .print-left-column, .print-right-column { display: block; }
 
-        /* RECONFIGURED PRINT ENGINE - Retains Header Elements clearly */
+        /* PRINT CONFIGURATIONS */
         @media print {
-            @page { size: portrait; margin: 0.4cm; }
-            body { background: white; margin: 0; padding: 0; max-width: 100%; color: #000; font-size: 10px; }
-            .card, .btn, p, .tax-section, .btn-secondary, h2:not(.print-header) { display: none !important; }
+            @page { size: portrait; margin: 0.3cm; }
+            body { background: white; margin: 0; padding: 0; max-width: 100%; color: #000; font-size: 9px; }
+            .card, .btn, p, .tax-section, .btn-secondary, h2, h3 { display: none !important; }
+            
             #result { display: block !important; border: none !important; background: white !important; padding: 0 !important; margin: 0 !important; }
             
-            /* Make header explicit on print preview map tracking */
-            h2.print-header { display: block !important; text-align: center !important; margin-bottom: 4px !important; font-size: 16px !important; border-bottom: 2px solid #000 !important; padding-bottom: 6px !important; }
-            .print-sub-header { display: block !important; text-align: center !important; color: #555 !important; font-size: 10px !important; margin-bottom: 12px !important; }
+            h2.print-header { display: block !important; text-align: center !important; margin-bottom: 2px !important; font-size: 15px !important; border-bottom: 2px solid #1a202c !important; padding-bottom: 4px !important; font-weight: bold !important; }
+            .print-sub-header { display: block !important; text-align: center !important; color: #4a5568 !important; font-size: 9px !important; margin-bottom: 12px !important; }
 
-            .print-side-grid { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 12px !important; margin-bottom: 10px !important; }
-            .table-responsive { margin: 0 !important; border: none !important; }
+            .print-main-grid { display: grid !important; grid-template-columns: 1.1fr 0.9fr !important; gap: 14px !important; align-items: start !important; }
             
-            table { width: 100% !important; border: 1px solid #000 !important; }
-            th, td { padding: 5px 6px !important; border: 1px solid #000 !important; font-size: 10px !important; }
-            th { background: #f0f0f0 !important; color: #000 !important; }
+            .table-responsive { margin: 0 0 10px 0 !important; border: none !important; }
+            table { width: 100% !important; border: 1px solid #1a202c !important; margin-bottom: 8px !important; }
+            th, td { padding: 4px 5px !important; border: 1px solid #1a202c !important; font-size: 9px !important; }
+            th { background: #edf2f7 !important; color: #000 !important; font-weight: bold !important; }
             
-            .breakdown-card { border: 1px solid #000 !important; padding: 8px !important; margin-bottom: 6px !important; page-break-inside: avoid; background: transparent !important; box-shadow: none !important; }
+            .print-right-column h3 { display: block !important; font-size: 11px !important; margin: 0 0 6px 0 !important; border-bottom: 1px solid #000 !important; padding-bottom: 2px !important; }
+            .breakdown-card { border: 1px solid #1a202c !important; padding: 8px !important; margin-bottom: 6px !important; page-break-inside: avoid !important; background: transparent !important; box-shadow: none !important; border-radius: 6px !important; }
+            .breakdown-header { font-size: 12px !important; font-weight: bold !important; border-bottom: 1px dashed #718096 !important; padding-bottom: 4px !important; margin-bottom: 4px !important; }
+            .breakdown-header span[style] { color: #000 !important; font-size: 13px !important; font-weight: 800 !important; }
+            .breakdown-details { font-size: 9.5px !important; color: #000 !important; line-height: 1.3 !important; }
+            .breakdown-details b { font-weight: 700 !important; color: #1a202c !important; }
+
+            .payment-summary-box { border: 1px dashed #1a202c !important; background: #fff !important; display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px !important; margin-top: 10px !important; page-break-inside: avoid !important; border-radius: 6px !important; width: 100% !important; box-sizing: border-box !important; }
+            .payment-summary-box h3 { display: block !important; font-size: 11px !important; margin: 0 0 4px 0 !important; font-weight: bold !important; }
+            .payment-summary-box p { display: block !important; font-size: 9.5px !important; margin: 3px 0 !important; }
             
-            .payment-summary-box { border: 1px dashed #000 !important; background: white !important; display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 12px !important; margin-top: 12px !important; page-break-inside: avoid; }
-            
-            .qr-preview-container { max-width: 200px !important; }
-            .qr-preview-img { max-width: 100% !important; width: 190px !important; height: auto !important; border: 1px solid #000 !important; }
+            .qr-preview-container { max-width: 170px !important; text-align: center !important; display: block !important; }
+            .qr-preview-container label { display: block !important; font-size: 8.5px !important; font-weight: bold !important; margin-bottom: 2px !important; }
+            .qr-preview-img { max-width: 100% !important; width: 150px !important; height: auto !important; border: 1px solid #000 !important; margin: 0 auto !important; }
             
             #copyBtn { display: none !important; }
-            h3 { margin-bottom: 6px !important; font-size: 1.1em !important; margin-top: 8px !important; }
         }
     </style>
 </head>
@@ -286,6 +294,23 @@
             }
         }
 
+        // NEW LOGIC: Updates browser metadata to capture exact description strings during saving sequences
+        function triggerCustomPrint() {
+            const billDesc = document.getElementById('billDesc').value.trim() || "Makan Breakdown";
+            const originalTitle = document.title;
+            
+            // Set browser title to custom filename string pattern
+            document.title = billDesc;
+            
+            // Call standard interface layout output print mapping
+            window.print();
+            
+            // Revert back immediately to ensure main app title visibility isn't lost
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 100);
+        }
+
         function calculateBill() {
             const payer = document.getElementById('payer').value.trim();
             if (!payer) { alert('Please specify who paid upfront.'); return; }
@@ -337,12 +362,13 @@
             const totalTax = overallSubtotal * taxPct;
             const grandTotal = overallSubtotal + totalService + totalTax;
 
-            // Added dynamic non-hidden "print-header" element class names for direct image exports
-            let resultsHtml = `<h2 class="print-header">🧾 ${billDesc}</h2>`;
-            resultsHtml += `<p class="print-sub-header" style="margin-top: 0; color: #64748b; font-size: 0.9em; margin-bottom:20px;">Calculated via Makan Calculator by Andy | Paid by: <b>${payer}</b></p>`;
+            let resultsHtml = `<div class="print-layout-wrapper">`;
+            resultsHtml += `<h2 class="print-header">🧾 ${billDesc}</h2>`;
+            resultsHtml += `<p class="print-sub-header">Calculated via Makan Calculator by Andy | Paid by: <b>${payer}</b></p>`;
             
-            resultsHtml += `<div class="print-side-grid">`;
+            resultsHtml += `<div class="print-main-grid">`;
 
+            resultsHtml += `<div class="print-left-column">`;
             resultsHtml += `<div class="table-responsive"><h3>📋 Item Details</h3><table><thead><tr><th>Item Description</th><th>Price</th><th>Shared By</th></tr></thead><tbody>`;
             if(receiptItemsLogged.length === 0) {
                 resultsHtml += `<tr><td colspan="3" style="text-align:center; color:#777;">No items split yet.</td></tr>`;
@@ -358,9 +384,9 @@
             resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td>MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
-            
             resultsHtml += `</div>`; 
 
+            resultsHtml += `<div class="print-right-column">`;
             resultsHtml += `<h3>💰 Final Breakdown (Pay to ${payer})</h3>`;
             
             friends.forEach(friend => {
@@ -385,6 +411,8 @@
                     `;
                 }
             });
+            resultsHtml += `</div>`; 
+            resultsHtml += `</div>`; 
 
             const holderName = document.getElementById('payeeName').value.trim();
             const bankDetails = document.getElementById('bankInfo').value.trim();
@@ -394,21 +422,23 @@
                 resultsHtml += `<div class="payment-summary-box">`;
                 resultsHtml += `<div style="flex: 1; min-width: 240px;">`;
                 resultsHtml += `<h3 style="margin-bottom:8px;">📌 Payment Transfer to ${payer}</h3>`;
-                if (holderName)  resultsHtml += `<p style="margin: 4px 0; font-size:0.95em;"><b>Account Name:</b> ${holderName}</p>`;
-                if (bankDetails)  resultsHtml += `<p style="margin: 4px 0; font-size:0.95em;"><b>Bank Details:</b> ${bankDetails}</p>`;
-                if (phoneDetails) resultsHtml += `<p style="margin: 4px 0; font-size:0.95em;"><b>DuitNow / TNG:</b> ${phoneDetails}</p>`;
+                if (holderName)  resultsHtml += `<p><b>Account Name:</b> ${holderName}</p>`;
+                if (bankDetails)  resultsHtml += `<p><b>Bank Details:</b> ${bankDetails}</p>`;
+                if (phoneDetails) resultsHtml += `<p><b>DuitNow / TNG:</b> ${phoneDetails}</p>`;
                 resultsHtml += `</div>`;
                 
                 if (qrDataUrl) {
                     resultsHtml += `<div class="qr-preview-container">`;
-                    resultsHtml += `<span style="font-size:0.8em; font-weight:700; color:#4a5568; display:block;">Scan to Pay</span>`;
+                    resultsHtml += `<label>Scan to Pay</label>`;
                     resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" alt="Payment QR Code">`;
                     resultsHtml += `</div>`;
                 }
                 resultsHtml += `</div>`;
             }
+            resultsHtml += `</div>`; 
 
-            resultsHtml += `<button id="copyBtn" class="btn btn-purple" onclick="window.print()">📷 Save Receipt Image</button>`;
+            // Call updated execution step mapping custom title triggers cleanly
+            resultsHtml += `<button id="copyBtn" class="btn btn-purple" onclick="triggerCustomPrint()">📷 Save Receipt Image</button>`;
 
             const resDiv = document.getElementById('result');
             resDiv.innerHTML = resultsHtml;
