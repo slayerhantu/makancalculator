@@ -84,11 +84,12 @@
         .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; }
         .breakdown-details { font-size: 1em; color: #4a5568; line-height: 1.6; }
         
-        /* Layout ensures text on left, QR on right */
-        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 24px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; gap: 20px; }
+        /* UPDATED: Flex-wrap ensures it adapts to small screens without breaking the dashed box */
+        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 24px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; text-align: left; gap: 20px; }
         
-        .qr-preview-container { max-width: 200px; text-align: center; flex-shrink: 0; }
-        .qr-preview-img { width: 160px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
+        /* UPDATED: margin-left: auto ensures it stays bottom-right if it stacks on mobile */
+        .qr-preview-container { max-width: 200px; text-align: center; flex-shrink: 0; margin-left: auto; }
+        .qr-preview-img { width: 140px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
 
         /* iPHONE POPUP MODAL (Forces visual image display instead of silent download) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
@@ -434,7 +435,8 @@
             
             if (holderName || bankName || accNum || qrDataUrl) {
                 resultsHtml += `<div class="payment-summary-box">`;
-                resultsHtml += `<div style="flex: 1; min-width: 200px;">`;
+                // UPDATED: Added word-break so long account numbers don't push the layout out
+                resultsHtml += `<div style="flex: 1; min-width: 200px; word-break: break-word;">`;
                 resultsHtml += `<h3 style="margin-top:0; margin-bottom:12px;">📌 Payment Transfer to ${payer}</h3>`;
                 if (holderName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account Name:</b> ${holderName}</p>`;
                 if (bankName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Bank Name:</b> ${bankName}</p>`;
