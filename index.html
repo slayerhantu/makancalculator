@@ -84,10 +84,11 @@
         .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; }
         .breakdown-details { font-size: 1em; color: #4a5568; line-height: 1.6; }
         
-        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 20px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+        /* Updated Payment Box - Stacks text and QR vertically and centers them */
+        .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 24px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
         
-        .qr-preview-container { max-width: 180px; text-align: center; }
-        .qr-preview-img { width: 160px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
+        .qr-preview-container { max-width: 200px; text-align: center; }
+        .qr-preview-img { width: 180px; height: auto; border-radius: 12px; border: 2px solid var(--border); display: block; margin: 4px auto 0; background: #fff; }
 
         /* iPHONE POPUP MODAL (Forces visual image display instead of silent download) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
@@ -290,32 +291,25 @@
             
             actionButton.innerText = "⏳ Generating Photo...";
             
-            // 1. Force the wrapper to act like a wide desktop screen temporarily
             const originalWidth = printTarget.style.width;
             printTarget.style.width = '850px';
             printTarget.style.maxWidth = 'none';
-            
-            // 2. Force the Side-by-Side layout explicitly via CSS class
             gridTarget.classList.add('force-desktop');
 
-            // 3. Take snapshot exactly as styled
             html2canvas(printTarget, {
-                scale: 2, // Double resolution for crystal clear text and QR scans
+                scale: 2, 
                 backgroundColor: "#ffffff",
                 useCORS: true,
                 logging: false,
                 onclone: function (clonedDoc) {
-                    // Ensures the snapshot clone maintains the forced sizes
                     clonedDoc.getElementById('printArea').style.width = '850px';
                 }
             }).then(canvas => {
-                // 4. Revert screen layout back to mobile friendly size
                 printTarget.style.width = originalWidth;
                 gridTarget.classList.remove('force-desktop');
                 
                 const imagePathUrl = canvas.toDataURL("image/png");
                 
-                // 5. Display inside the iPhone-friendly Modal
                 document.getElementById('finalGeneratedImage').src = imagePathUrl;
                 document.getElementById('photoModal').style.display = 'flex';
                 
@@ -384,7 +378,6 @@
             resultsHtml += `<h2 style="text-align:center; font-size:1.8em; margin-bottom:4px; font-weight:800; border-bottom:3px solid var(--dark); padding-bottom:10px;">🧾 ${billDesc}</h2>`;
             resultsHtml += `<p style="text-align:center; color: #64748b; font-size: 1.1em; margin-top:10px; margin-bottom:30px;">Calculated via Makan Calculator | Paid by: <b style="color:var(--dark);">${payer}</b></p>`;
             
-            // The Grid that gets forced Side-by-Side during snapshot
             resultsHtml += `<div id="receiptGrid" class="receipt-grid">`;
 
             // Left Side Data
@@ -440,8 +433,9 @@
             const phoneDetails = document.getElementById('tngDuitnow').value.trim();
             
             if (holderName || bankDetails || phoneDetails || qrDataUrl) {
+                // Stacked Payment Layout Update
                 resultsHtml += `<div class="payment-summary-box">`;
-                resultsHtml += `<div style="flex: 1; min-width: 240px;">`;
+                resultsHtml += `<div style="width: 100%;">`;
                 resultsHtml += `<h3 style="margin-bottom:12px;">📌 Payment Transfer to ${payer}</h3>`;
                 if (holderName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account Name:</b> ${holderName}</p>`;
                 if (bankDetails)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Bank Details:</b> ${bankDetails}</p>`;
@@ -458,7 +452,6 @@
             }
             resultsHtml += `</div>`; 
 
-            // Renders the button outside the printArea div so it is not included in the final photo snapshot
             resultsHtml += `<button id="copyBtn" class="btn btn-purple" onclick="captureAndDownloadPhoto()">📷 Save Receipt Image (PNG)</button>`;
 
             const resDiv = document.getElementById('result');
