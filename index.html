@@ -147,7 +147,7 @@
         <div class="changelog-box">
             <div class="changelog-header-container">
                 <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.14 | Last updated: 4th July 2026</div>
+                <div class="version-stamp">version 1.15 | Last updated: 4th July 2026</div>
             </div>
             
             <div class="changelog-item">
@@ -261,16 +261,22 @@
         let friends = [];
         let qrDataUrl = ""; 
         
-        const COUNTAPI_URL = "https://api.countapi.xyz/json/makancalculator_andy";
+        // High-performance cross-network live counter endpoint
+        const MOKY_KEY = "makancalc_andy_counter";
+        const COUNTER_URL = `https://api.moky.io/v1/counts/${MOKY_KEY}`;
 
         // Fetch analytical data metrics transparently upon boot initialisation
         document.addEventListener("DOMContentLoaded", () => {
-            fetch(COUNTAPI_URL)
-                .then(res => res.json())
+            fetch(COUNTER_URL)
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.json();
+                })
                 .then(data => {
-                    document.getElementById("globalCalcCounter").innerText = data.value;
+                    document.getElementById("globalCalcCounter").innerText = data.value || 0;
                 })
                 .catch(() => {
+                    // Failover gracefully to fallback values
                     document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
                 });
         });
@@ -474,11 +480,14 @@
                 }
             });
 
-            // Hit the web endpoint context to update numbers globally across user device matrices
-            fetch(`https://api.countapi.xyz/hit/makancalculator_andy`)
-                .then(res => res.json())
+            // Secure cross-network atomic live increment post request
+            fetch(COUNTER_URL, { method: 'POST' })
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.json();
+                })
                 .then(data => {
-                    document.getElementById("globalCalcCounter").innerText = data.value;
+                    document.getElementById("globalCalcCounter").innerText = data.value || 0;
                 })
                 .catch(() => {
                     let newCalcTotal = parseInt(localStorage.getItem("makanCalcCount") || 0) + 1;
