@@ -149,12 +149,12 @@
         <div class="changelog-box">
             <div class="changelog-header-container">
                 <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.09 | Last updated: 4th July 2026</div>
+                <div class="version-stamp">version 1.10 | Last updated: 4th July 2026</div>
             </div>
             
             <div class="changelog-item">
-                <div class="changelog-title">🤖 AI-Powered Receipt Processing</div>
-                <div class="changelog-desc">Upload a picture of your physical receipt! The app will scan the names and prices instantly so you only need to assign checkboxes.</div>
+                <div class="changelog-title">🤖 Upgraded AI Receipt Scanner</div>
+                <div class="changelog-desc">Highly resilient text parsing engine that dynamically catches whole numbers, varying decimal formats, and cleans trailing characters automatically.</div>
             </div>
             
             <div class="changelog-item">
@@ -295,23 +295,40 @@
             });
         });
 
-        // Regex Parser Engine to automatically match text patterns to Item Name + Price values
+        // Smart flexible parsing engine for matching text data lines cleanly across mobile capture angles
         function parseReceiptTextToItems(rawText) {
             const container = document.getElementById('itemsContainer');
             const lines = rawText.split('\n');
             let foundItems = false;
 
             lines.forEach(line => {
-                const priceMatch = line.match(/(.+?)\s+(?:RM\s*)?(\d+\.\d{2})\s*$/i);
+                // Standardize common OCR errors: replace commas with dots for prices, remove unwanted whitespace layout symbols
+                let cleanLine = line.replace(/,/g, '.').trim();
+                
+                // Flexible regex matching: captures item structures ending with any format numbers (e.g. 18.50, 24, RM24)
+                const priceMatch = cleanLine.match(/(.+?)\s+(?:RM\s*)?(\d+(?:\.\d{1,2})?)\s*$/i);
+                
                 if (priceMatch) {
-                    if (!foundItems) {
-                        container.innerHTML = ""; 
-                        foundItems = true;
-                    }
-                    const itemName = priceMatch[1].replace(/[\d.*]/g, '').trim();
-                    const itemPrice = parseFloat(priceMatch[2]);
+                    let itemName = priceMatch[1].replace(/[\d.*]/g, '').trim();
+                    let itemPrice = parseFloat(priceMatch[2]);
                     
-                    if (itemName.length > 2 && itemPrice > 0) {
+                    // Filter out subtotal, totals, and tax parameters explicitly so they don't break row distributions
+                    const lowerName = itemName.toLowerCase();
+                    if (lowerName.includes('total') || 
+                        lowerName.includes('subtotal') || 
+                        lowerName.includes('sst') || 
+                        lowerName.includes('tax') || 
+                        lowerName.includes('service charge') ||
+                        lowerName.includes('amount')) {
+                        return; 
+                    }
+                    
+                    if (itemName.length > 1 && itemPrice > 0) {
+                        if (!foundItems) {
+                            container.innerHTML = ""; 
+                            foundItems = true;
+                        }
+                        
                         const rowId = container.children.length;
                         const entryCard = document.createElement('div');
                         entryCard.className = 'item-entry-row';
