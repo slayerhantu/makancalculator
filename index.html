@@ -40,8 +40,6 @@
         .story-box { background: #e8f4fd; border-left: 4px solid var(--secondary); padding: 18px; border-radius: 8px; font-size: 0.95em; color: #34495e; line-height: 1.6; }
         .story-box p { margin: 0 0 12px 0; }
         .story-box p:last-child { margin-bottom: 0; }
-
-        .counter-box { background: #fffde7; border: 1px dashed #fbc02d; padding: 12px 18px; border-radius: 8px; font-size: 0.95em; color: #5d4037; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         
         .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
@@ -91,7 +89,6 @@
         .btn-purple:hover { background-color: var(--accent-hover); }
         
         .tax-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; border-top: 2px solid var(--border); padding-top: 24px; margin-bottom: 24px; }
-        input[type="file"] { padding: 8px; background: #fff; border-style: dashed; cursor: pointer; }
 
         /* RECEIPT VISUAL CONTAINER STYLES */
         .result-box { display: none; margin-top: 24px; }
@@ -118,6 +115,14 @@
         .qr-preview-img { width: 240px !important; height: 240px !important; max-width: 240px !important; min-width: 240px !important; object-fit: contain; border-radius: 12px; border: 2px solid var(--border); margin: 8px auto 0; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
         
         .qr-instruction-note { max-width: 400px; font-size: 0.88em; font-weight: 600; color: #475569; background: #e2e8f0; padding: 8px 16px; border-radius: 8px; margin-top: 12px; line-height: 1.4; border: 1px solid #cbd5e1; }
+
+        /* iPHONE POPUP MODAL */
+        .modal-overlay { display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .modal-overlay.active { display: flex !important; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 16px; text-align: center; max-width: 95%; max-height: 90%; display: flex; flex-direction: column; }
+        .modal-content img { max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; border: 1px solid #ddd; margin: 15px 0; }
+        .modal-instructions { font-size: 1.1em; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+        .modal-close-btn { background: #e74c3c; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 1em; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -134,26 +139,20 @@
             <p>Makan Calculator fixes that. This app introduces a <b>fair and stress-free bill splitting solution</b> that handles service charges, calculates exact individual shares, and eliminates group chat awkwardness completely.</p>
         </div>
 
-        <!-- Dynamic Counter Display Box -->
-        <div class="counter-box">
-            <span>📊 Total Bill Splits Calculated (Global):</span>
-            <span id="globalCalcCounter" style="font-size: 1.1em; color: var(--primary-hover);">0</span>
-        </div>
-
         <div class="changelog-box">
             <div class="changelog-header-container">
                 <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.17 | Last updated: 4th July 2026</div>
+                <div class="version-stamp">version 1.20 | Last updated: 4th July 2026</div>
             </div>
             
             <div class="changelog-item">
-                <div class="changelog-title">💡 Embedded Gallery-Scan QR Instructions</div>
-                <div class="changelog-desc">Added custom scanning onboarding tips directly inside the shared visual breakdown box to reduce group payment hassle.</div>
+                <div class="changelog-title">📊 Google Forms Analytics Pipeline</div>
+                <div class="changelog-desc">Migrated calculation telemetry to a secure, decoupled Google Forms endpoint to track split activity safely without exposing credentials on public source repositories.</div>
             </div>
 
             <div class="changelog-item">
-                <div class="changelog-title">📸 Direct Gallery Image Saving</div>
-                <div class="changelog-desc">Skip the PDFs! You can now render and save your receipt as a clear image directly into your phone's photo library.</div>
+                <div class="changelog-title">🔎 High-Scan WhatsApp Optimized QR Codes</div>
+                <div class="changelog-desc">Enlarged payment boxes to support full-width centered QR code rendering to ensure codes remain perfectly scannable inside compressed mobile messaging chats.</div>
             </div>
         </div>
 
@@ -238,23 +237,6 @@
     <script>
         let friends = [];
         let qrDataUrl = ""; 
-        
-        const MOKY_KEY = "makancalc_andy_counter";
-        const COUNTER_URL = `https://api.moky.io/v1/counts/${MOKY_KEY}`;
-
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch(COUNTER_URL)
-                .then(res => {
-                    if (!res.ok) throw new Error();
-                    return res.json();
-                })
-                .then(data => {
-                    document.getElementById("globalCalcCounter").innerText = data.value || 0;
-                })
-                .catch(() => {
-                    document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
-                });
-        });
 
         function startApp() {
             document.getElementById('landingPage').style.display = 'none';
@@ -273,7 +255,7 @@
         });
 
         function closeModal() {
-            document.getElementById('photoModal').style.display = 'none';
+            document.getElementById('photoModal').classList.remove('active');
         }
 
         function handleSetupChange() {
@@ -396,7 +378,7 @@
                 const imagePathUrl = canvas.toDataURL("image/png");
                 
                 document.getElementById('finalGeneratedImage').src = imagePathUrl;
-                document.getElementById('photoModal').style.display = 'flex';
+                document.getElementById('photoModal').classList.add('active');
                 
                 actionButton.innerText = "📷 Save Receipt Image (PNG)";
             }).catch(error => {
@@ -406,6 +388,23 @@
                 gridTarget.classList.remove('force-desktop');
                 alert("Failed to render image.");
             });
+        }
+
+        // Submits the analytics counter tracking ping quietly to your specific Google Form
+        function submitToGoogleForm(eventDescription) {
+            const FORM_ID = "1FAIpQLSd1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
+            const ENTRY_ID = "entry.915321234";
+            
+            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
+            
+            const formData = new FormData();
+            formData.append(ENTRY_ID, eventDescription);
+
+            fetch(formUrl, {
+                method: "POST",
+                mode: "no-cors",
+                body: formData
+            }).catch(err => console.log("Telemetry skipped:", err));
         }
 
         function calculateBill() {
@@ -455,19 +454,8 @@
                 }
             });
 
-            fetch(COUNTER_URL, { method: 'POST' })
-                .then(res => {
-                    if (!res.ok) throw new Error();
-                    return res.json();
-                })
-                .then(data => {
-                    document.getElementById("globalCalcCounter").innerText = data.value || 0;
-                })
-                .catch(() => {
-                    let newCalcTotal = parseInt(localStorage.getItem("makanCalcCount") || 0) + 1;
-                    localStorage.setItem("makanCalcCount", newCalcTotal);
-                    document.getElementById("globalCalcCounter").innerText = newCalcTotal;
-                });
+            // Fire tracking event logic securely in the background
+            submitToGoogleForm(billDesc);
 
             const totalService = overallSubtotal * servicePct;
             const totalTax = overallSubtotal * taxPct;
@@ -544,7 +532,6 @@
                     resultsHtml += `<div class="qr-preview-container">`;
                     resultsHtml += `<label style="font-size:1.1em; font-weight:800; color:var(--dark); margin-bottom:2px;">Scan to Pay</label>`;
                     resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" alt="Payment QR Code">`;
-                    // Added instruction note component below the image container cleanly
                     resultsHtml += `<div class="qr-instruction-note">💡 Save the image, go to banking apps and select scan, then select scan from gallery</div>`;
                     resultsHtml += `</div>`;
                 }
