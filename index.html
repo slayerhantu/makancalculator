@@ -40,6 +40,8 @@
         .story-box { background: #e8f4fd; border-left: 4px solid var(--secondary); padding: 18px; border-radius: 8px; font-size: 0.95em; color: #34495e; line-height: 1.6; }
         .story-box p { margin: 0 0 12px 0; }
         .story-box p:last-child { margin-bottom: 0; }
+
+        .counter-box { background: #fffde7; border: 1px dashed #fbc02d; padding: 12px 18px; border-radius: 8px; font-size: 0.95em; color: #5d4037; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         
         .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
@@ -139,20 +141,26 @@
             <p>Makan Calculator fixes that. This app introduces a <b>fair and stress-free bill splitting solution</b> that handles service charges, calculates exact individual shares, and eliminates group chat awkwardness completely.</p>
         </div>
 
+        <!-- Live Cross-Device Counter Box Display -->
+        <div class="counter-box">
+            <span>📊 Total Bill Splits Calculated (Global Live):</span>
+            <span id="globalCalcCounter" style="font-size: 1.1em; color: var(--primary-hover);">⏳ Loading...</span>
+        </div>
+
         <div class="changelog-box">
             <div class="changelog-header-container">
                 <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.20 | Last updated: 4th July 2026</div>
+                <div class="version-stamp">version 1.23 | Last updated: 4th July 2026</div>
             </div>
             
             <div class="changelog-item">
-                <div class="changelog-title">📊 Google Forms Analytics Pipeline</div>
-                <div class="changelog-desc">Migrated calculation telemetry to a secure, decoupled Google Forms endpoint to track split activity safely without exposing credentials on public source repositories.</div>
+                <div class="changelog-title">🌐 Live Shared Spreadsheet Pipeline</div>
+                <div class="changelog-desc">Integrated your specific secure Google Sheet data key to extract live calculation row values instantly across all systems.</div>
             </div>
 
             <div class="changelog-item">
-                <div class="changelog-title">🔎 High-Scan WhatsApp Optimized QR Codes</div>
-                <div class="changelog-desc">Enlarged payment boxes to support full-width centered QR code rendering to ensure codes remain perfectly scannable inside compressed mobile messaging chats.</div>
+                <div class="changelog-title">📊 Google Forms Analytics Pipeline</div>
+                <div class="changelog-desc">Migrated calculation telemetry to a secure, decoupled Google Forms endpoint to track split activity safely without exposing credentials on public source repositories.</div>
             </div>
         </div>
 
@@ -237,6 +245,34 @@
     <script>
         let friends = [];
         let qrDataUrl = ""; 
+        
+        // Google Spreadsheet ID configured securely
+        const SHEET_ID = "2PACX-1vSJhCIEfD1KhgoD_S54fYwjDOWdZyFpoOTSEHzgNhMcisXIqBu69Ys_tKI5j9Vcr58vbFaGCGTqs7oN";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchLiveCount();
+        });
+
+        function fetchLiveCount() {
+            if (!SHEET_ID) {
+                document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
+                return;
+            }
+            
+            // Connects directly to the published web page export source URL
+            const csvUrl = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?output=csv&gid=35386619`;
+            
+            fetch(csvUrl)
+                .then(res => res.text())
+                .then(text => {
+                    const lines = text.trim().split("\n");
+                    const submissionCount = lines.length > 1 ? lines.length - 1 : 0;
+                    document.getElementById("globalCalcCounter").innerText = submissionCount;
+                })
+                .catch(() => {
+                    document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
+                });
+        }
 
         function startApp() {
             document.getElementById('landingPage').style.display = 'none';
@@ -390,7 +426,6 @@
             });
         }
 
-        // Submits the analytics counter tracking ping quietly to your specific Google Form
         function submitToGoogleForm(eventDescription) {
             const FORM_ID = "1FAIpQLSd1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
             const ENTRY_ID = "entry.915321234";
@@ -404,6 +439,8 @@
                 method: "POST",
                 mode: "no-cors",
                 body: formData
+            }).then(() => {
+                setTimeout(fetchLiveCount, 1000);
             }).catch(err => console.log("Telemetry skipped:", err));
         }
 
@@ -454,7 +491,9 @@
                 }
             });
 
-            // Fire tracking event logic securely in the background
+            let newCalcTotal = parseInt(localStorage.getItem("makanCalcCount") || 0) + 1;
+            localStorage.setItem("makanCalcCount", newCalcTotal);
+
             submitToGoogleForm(billDesc);
 
             const totalService = overallSubtotal * servicePct;
