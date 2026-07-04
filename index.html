@@ -424,14 +424,24 @@
             });
         }
 
-        function submitToGoogleForm(eventDescription) {
-            const FORM_ID = "1FAIpQLSf1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
-            const ENTRY_ID = "entry.915321234";
+        // Auto-wired backend telemetry collection system mapped directly to your custom form ID links
+        function submitToGoogleForm(billDesc, payer, friendsList, itemBreakdowns) {
+            const FORM_ID = "1FAIpQLSd1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
+            
+            const ENTRY_COUNTER = "entry.915321234"; 
+            const ENTRY_DESC    = "entry.333614682";    
+            const ENTRY_PAYER   = "entry.1258481354";   
+            const ENTRY_FRIENDS = "entry.504060280";    
+            const ENTRY_ITEMS   = "entry.331270470";    
             
             const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
             
             const formData = new FormData();
-            formData.append(ENTRY_ID, eventDescription);
+            formData.append(ENTRY_COUNTER, "1");
+            formData.append(ENTRY_DESC, billDesc);
+            formData.append(ENTRY_PAYER, payer);
+            formData.append(ENTRY_FRIENDS, friendsList);
+            formData.append(ENTRY_ITEMS, JSON.stringify(itemBreakdowns));
 
             fetch(formUrl, {
                 method: "POST",
@@ -447,6 +457,7 @@
             if (!payer) { alert('Please specify who paid upfront.'); return; }
             
             const billDesc = document.getElementById('billDesc').value.trim() || "Makan Breakdown";
+            const friendsInput = document.getElementById('friendsList').value.trim();
             const servicePct = (parseFloat(document.getElementById('servicePct').value) || 0) / 100;
             const taxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
             
@@ -489,14 +500,12 @@
                 }
             });
 
-            let newCalcTotal = parseInt(localStorage.getItem("makanCalcCount") || 0) + 1;
-            localStorage.setItem("makanCalcCount", newCalcTotal);
-
-            submitToGoogleForm(billDesc);
-
             const totalService = overallSubtotal * servicePct;
             const totalTax = overallSubtotal * taxPct;
             const grandTotal = overallSubtotal + totalService + totalTax;
+
+            // Transmit data logs into spreadsheet database engine
+            submitToGoogleForm(billDesc, payer, friendsInput, receiptItemsLogged);
 
             let resultsHtml = `<div id="printArea">`;
             resultsHtml += `<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 4px; font-weight: 800; border-bottom: 3px solid var(--dark); padding-bottom: 10px;">🧾 ${billDesc}</h2>`;
