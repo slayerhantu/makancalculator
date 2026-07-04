@@ -90,11 +90,10 @@
         
         .tax-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; border-top: 2px solid var(--border); padding-top: 24px; margin-bottom: 24px; }
 
-        /* RECEIPT VISUAL CONTAINER STYLES - STABLE PICTURE CAPTURE FORMATTING */
+        /* RECEIPT VISUAL CONTAINER STYLES */
         .result-box { display: none; margin-top: 24px; }
         #printArea { background: #ffffff; padding: 30px; border-radius: 16px; border: 2px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         
-        /* Forces html2canvas to render text with beautiful native spacing breaks */
         #printArea, #printArea td, #printArea th, #printArea p, #printArea span, #printArea h2, #printArea h3, #printArea b {
             word-spacing: 3px !important;
             letter-spacing: 0.2px !important;
@@ -156,7 +155,7 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 1.31 | Last updated: 4th July 2026</span>
+                <span class="version-stamp">version 1.32 | Last updated: 4th July 2026</span>
             </div>
             
             <div class="feature-item">
@@ -279,9 +278,17 @@
                         document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
                         return;
                     }
-                    const lines = cleanText.split("\n").filter(line => line.trim().length > 0);
-                    const submissionCount = lines.length > 1 ? lines.length - 1 : 0;
-                    document.getElementById("globalCalcCounter").innerText = submissionCount;
+                    // Robust parser that filters out empty rows and counts based purely on active timestamps
+                    const lines = cleanText.split("\n");
+                    let continuousCount = 0;
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].trim().length > 0 && lines[i].includes("/")) {
+                            continuousCount++;
+                        }
+                    }
+                    
+                    document.getElementById("globalCalcCounter").innerText = continuousCount > 0 ? continuousCount : (localStorage.getItem("makanCalcCount") || 0);
                 })
                 .catch(() => {
                     document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
@@ -529,7 +536,7 @@
 
             // Left Side Data
             resultsHtml += `<div>`;
-            resultsHtml += `<div class="table-responsive"><h3>📋 Item Details</h3><table><thead><tr><th>Item Description</th><th>Price</th><th>Shared By</th></tr></thead><tbody>`;
+            resultsHtml += `<div class="table-responsive"><h3>📋 Item Description</h3><table><thead><tr><th>Item Description</th><th>Price</th><th>Shared By</th></tr></thead><tbody>`;
             if(receiptItemsLogged.length === 0) {
                 resultsHtml += `<tr><td colspan="3" style="text-align: center; color: #777;">No items split yet.</td></tr>`;
             } else {
