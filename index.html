@@ -23,7 +23,7 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); max-width: 800px; margin: 30px auto; padding: 0 15px; line-height: 1.5; }
         .card { background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid var(--border); }
-        h2, h3 { margin-top: 0; color: var(--dark); font-weight: 700; margin-bottom: 16px; }
+        h2, h3 { margin-top: 0; color: var(--dark); font-weight: 700; margin-bottom: 16px; word-spacing: 0.1em; }
         
         label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9em; color: #4a5568; }
         input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1em; width: 100%; transition: all 0.2s; background: #fafafa; }
@@ -43,17 +43,12 @@
 
         .counter-box { background: #fffde7; border: 1px dashed #fbc02d; padding: 12px 18px; border-radius: 8px; font-size: 0.95em; color: #5d4037; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         
-        .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .changelog-box h3 { margin-bottom: 0; font-size: 1.1em; }
-        .version-stamp { font-size: 0.78em; color: #a0aec0; font-weight: 500; }
-        .changelog-item { margin-bottom: 14px; }
-        .changelog-item:last-child { margin-bottom: 0; }
-        .changelog-title { font-weight: 700; font-size: 0.95em; display: flex; align-items: center; gap: 6px; color: var(--dark); }
-        .changelog-desc { font-size: 0.88em; color: #64748b; margin-top: 2px; padding-left: 24px; }
-
-        .features-list { margin-top: 12px; padding-left: 20px; font-size: 0.9em; color: #4a5568; }
-        .features-list li { margin-bottom: 6px; }
+        .features-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .features-box h3 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; font-size: 1.2em; }
+        .feature-item { margin-bottom: 16px; }
+        .feature-item:last-child { margin-bottom: 0; }
+        .feature-title { font-weight: 700; font-size: 0.98em; display: flex; align-items: center; gap: 8px; color: var(--dark); }
+        .feature-desc { font-size: 0.88em; color: #64748b; margin-top: 4px; padding-left: 26px; line-height: 1.4; }
 
         .start-btn { display: block; width: 100%; padding: 16px; font-size: 1.2em; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 4px 12px rgba(46,204,113,0.2); }
         .start-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
@@ -95,28 +90,30 @@
         /* RECEIPT VISUAL CONTAINER STYLES */
         .result-box { display: none; margin-top: 24px; }
         #printArea { background: #ffffff; padding: 30px; border-radius: 16px; border: 2px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        #printArea * { word-spacing: 0.05em; }
         
         .receipt-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
         .receipt-grid.force-desktop { grid-template-columns: 1.1fr 0.9fr; }
 
         .table-responsive { width: 100%; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; background: #fff; }
-        th, td { padding: 14px; text-align: left; font-size: 1em; border-bottom: 1px solid var(--border); }
+        th, td { padding: 14px; text-align: left; font-size: 1em; border-bottom: 1px solid var(--border); letter-spacing: 0.01em; }
         th { background-color: #f8fafc; color: #4a5568; font-weight: 700; }
         
         .breakdown-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .breakdown-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed var(--border); padding-bottom: 12px; margin-bottom: 12px; }
         .breakdown-header span.name { font-size: 1.2em; font-weight: 800; color: var(--dark); }
-        .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; }
+        .breakdown-header span.amt { font-size: 1.4em; font-weight: 900; color: #e67e22; letter-spacing: 0.02em; }
         .breakdown-details { font-size: 1em; color: #4a5568; line-height: 1.6; }
         
         .payment-summary-box { background: #f8fafc; border: 2px dashed var(--secondary); padding: 24px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
         .payment-info-text { width: 100%; text-align: center; }
+        .payment-info-text p { margin: 8px 0; }
         
         .qr-preview-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-top: 10px; }
         .qr-preview-img { width: 240px !important; height: 240px !important; max-width: 240px !important; min-width: 240px !important; object-fit: contain; border-radius: 12px; border: 2px solid var(--border); margin: 8px auto 0; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
         
-        .qr-instruction-note { max-width: 400px; font-size: 0.88em; font-weight: 600; color: #475569; background: #e2e8f0; padding: 8px 16px; border-radius: 8px; margin-top: 12px; line-height: 1.4; border: 1px solid #cbd5e1; }
+        .qr-instruction-note { max-width: 450px; font-size: 0.9em; font-weight: 600; color: #475569; background: #e2e8f0; padding: 10px 18px; border-radius: 8px; margin-top: 14px; line-height: 1.5; border: 1px solid #cbd5e1; word-spacing: 0.08em; text-align: center; }
 
         /* iPHONE POPUP MODAL */
         .modal-overlay { display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
@@ -147,20 +144,23 @@
             <span id="globalCalcCounter" style="font-size: 1.1em; color: var(--primary-hover);">⏳ Loading...</span>
         </div>
 
-        <div class="changelog-box">
-            <div class="changelog-header-container">
-                <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.23 | Last updated: 4th July 2026</div>
-            </div>
+        <!-- Stable Attractive Features Section Display -->
+        <div class="features-box">
+            <h3>✨ Features You'll Love</h3>
             
-            <div class="changelog-item">
-                <div class="changelog-title">🌐 Live Shared Spreadsheet Pipeline</div>
-                <div class="changelog-desc">Integrated your specific secure Google Sheet data key to extract live calculation row values instantly across all systems.</div>
+            <div class="feature-item">
+                <div class="feature-title">🛡️ Smart Tax & Service Charge Splitting</div>
+                <div class="feature-desc">Automatically tracks and factors in individual service charges and government taxes proportional to what each person ordered. No manual percentages needed.</div>
             </div>
 
-            <div class="changelog-item">
-                <div class="changelog-title">📊 Google Forms Analytics Pipeline</div>
-                <div class="changelog-desc">Migrated calculation telemetry to a secure, decoupled Google Forms endpoint to track split activity safely without exposing credentials on public source repositories.</div>
+            <div class="feature-item">
+                <div class="feature-title">💬 WhatsApp Optimized Visual Receipts</div>
+                <div class="feature-desc">Converts your calculated bill breakdown into a beautiful, sharp layout image that fits perfectly inside messaging screens without losing scannability.</div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-title">📲 Direct Gallery-Scan QR Integration</div>
+                <div class="feature-desc">Attach your payment code directly into the final receipt breakdown so friends can instantly save the image and pay via their banking app's gallery option.</div>
             </div>
         </div>
 
@@ -246,7 +246,6 @@
         let friends = [];
         let qrDataUrl = ""; 
         
-        // Google Spreadsheet ID configured securely
         const SHEET_ID = "2PACX-1vSJhCIEfD1KhgoD_S54fYwjDOWdZyFpoOTSEHzgNhMcisXIqBu69Ys_tKI5j9Vcr58vbFaGCGTqs7oN";
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -259,7 +258,6 @@
                 return;
             }
             
-            // Connects directly to the published web page export source URL
             const csvUrl = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?output=csv&gid=35386619`;
             
             fetch(csvUrl)
@@ -427,7 +425,7 @@
         }
 
         function submitToGoogleForm(eventDescription) {
-            const FORM_ID = "1FAIpQLSd1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
+            const FORM_ID = "1FAIpQLSf1bMkYluclPPxjArnfCeomft9x05VOVDO0PFoGJOBCzHYvvA";
             const ENTRY_ID = "entry.915321234";
             
             const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
@@ -501,8 +499,8 @@
             const grandTotal = overallSubtotal + totalService + totalTax;
 
             let resultsHtml = `<div id="printArea">`;
-            resultsHtml += `<h2 style="text-align:center; font-size:1.8em; margin-bottom:4px; font-weight:800; border-bottom:3px solid var(--dark); padding-bottom:10px;">🧾 ${billDesc}</h2>`;
-            resultsHtml += `<p style="text-align:center; color: #64748b; font-size: 1.1em; margin-top:10px; margin-bottom:30px;">Calculated via Makan Calculator | Paid by: <b style="color:var(--dark);">${payer}</b></p>`;
+            resultsHtml += `<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 4px; font-weight: 800; border-bottom: 3px solid var(--dark); padding-bottom: 10px;">🧾 ${billDesc}</h2>`;
+            resultsHtml += `<p style="text-align: center; color: #64748b; font-size: 1.1em; margin-top: 10px; margin-bottom: 30px;">Calculated via Makan Calculator | Paid by: <b style="color: var(--dark);">${payer}</b></p>`;
             
             resultsHtml += `<div id="receiptGrid" class="receipt-grid">`;
 
@@ -510,10 +508,10 @@
             resultsHtml += `<div>`;
             resultsHtml += `<div class="table-responsive"><h3>📋 Item Details</h3><table><thead><tr><th>Item Description</th><th>Price</th><th>Shared By</th></tr></thead><tbody>`;
             if(receiptItemsLogged.length === 0) {
-                resultsHtml += `<tr><td colspan="3" style="text-align:center; color:#777;">No items split yet.</td></tr>`;
+                resultsHtml += `<tr><td colspan="3" style="text-align: center; color: #777;">No items split yet.</td></tr>`;
             } else {
                 receiptItemsLogged.forEach(item => {
-                    resultsHtml += `<tr><td><b>${item.desc}</b></td><td>RM ${item.price.toFixed(2)}</td><td style="color:#4a5568; font-size:0.9em;">${item.members}</td></tr>`;
+                    resultsHtml += `<tr><td><b>${item.desc}</b></td><td>RM ${item.price.toFixed(2)}</td><td style="color: #4a5568; font-size: 0.9em;">${item.members}</td></tr>`;
                 });
             }
             resultsHtml += `</tbody></table></div>`;
@@ -522,7 +520,7 @@
             resultsHtml += `<tr><td>Subtotal</td><td><b>MYR ${overallSubtotal.toFixed(2)}</b></td></tr>`;
             resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
-            resultsHtml += `<tr style="font-weight:bold; background:#e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td style="font-size:1.2em;">MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
+            resultsHtml += `<tr style="font-weight: bold; background: #e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td style="font-size: 1.2em;">MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
             resultsHtml += `</div>`; 
 
             // Right Side Data
@@ -544,8 +542,8 @@
                                 <span class="amt">RM ${finalPersonalTotal.toFixed(2)}</span>
                             </div>
                             <div class="breakdown-details">
-                                <b style="color:var(--dark);">Items:</b> ${itemsListString}<br>
-                                <span style="font-size:0.95em; color:#4a5568; margin-top:6px; display:block;"><b>Service Charge:</b> RM ${sCharge.toFixed(2)} | <b>SST:</b> RM ${tax.toFixed(2)}</span>
+                                <b style="color: var(--dark);">Items:</b> ${itemsListString}<br>
+                                <span style="font-size: 0.95em; color: #4a5568; margin-top: 6px; display: block;"><b>Service Charge:</b> RM ${sCharge.toFixed(2)} | <b>SST:</b> RM ${tax.toFixed(2)}</span>
                             </div>
                         </div>
                     `;
@@ -561,15 +559,15 @@
             if (holderName || bankName || accNum || qrDataUrl) {
                 resultsHtml += `<div class="payment-summary-box">`;
                 resultsHtml += `<div class="payment-info-text">`;
-                resultsHtml += `<h3 style="margin-top:0; margin-bottom:12px;">📌 Payment Transfer to ${payer}</h3>`;
-                if (holderName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account Name:</b> ${holderName}</p>`;
-                if (bankName)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Bank Name:</b> ${bankName}</p>`;
-                if (accNum)  resultsHtml += `<p style="margin:6px 0; font-size:1.1em;"><b>Account No:</b> ${accNum}</p>`;
+                resultsHtml += `<h3 style="margin-top: 0; margin-bottom: 12px;">📌 Payment Transfer to ${payer}</h3>`;
+                if (holderName)  resultsHtml += `<p style="font-size: 1.1em;"><b>Account Name:</b> ${holderName}</p>`;
+                if (bankName)  resultsHtml += `<p style="font-size: 1.1em;"><b>Bank Name:</b> ${bankName}</p>`;
+                if (accNum)  resultsHtml += `<p style="font-size: 1.1em;"><b>Account No:</b> ${accNum}</p>`;
                 resultsHtml += `</div>`;
                 
                 if (qrDataUrl) {
                     resultsHtml += `<div class="qr-preview-container">`;
-                    resultsHtml += `<label style="font-size:1.1em; font-weight:800; color:var(--dark); margin-bottom:2px;">Scan to Pay</label>`;
+                    resultsHtml += `<label style="font-size: 1.1em; font-weight: 800; color: var(--dark); margin-bottom: 2px;">Scan to Pay</label>`;
                     resultsHtml += `<img src="${qrDataUrl}" class="qr-preview-img" alt="Payment QR Code">`;
                     resultsHtml += `<div class="qr-instruction-note">💡 Save the image, go to banking apps and select scan, then select scan from gallery</div>`;
                     resultsHtml += `</div>`;
