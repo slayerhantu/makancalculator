@@ -42,6 +42,8 @@
         .story-box { background: #e8f4fd; border-left: 4px solid var(--secondary); padding: 18px; border-radius: 8px; font-size: 0.95em; color: #34495e; line-height: 1.6; }
         .story-box p { margin: 0 0 12px 0; }
         .story-box p:last-child { margin-bottom: 0; }
+
+        .counter-box { background: #fffde7; border: 1px dashed #fbc02d; padding: 12px 18px; border-radius: 8px; font-size: 0.95em; color: #5d4037; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         
         .changelog-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .changelog-header-container { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
@@ -138,10 +140,16 @@
             <p>Makan Calculator fixes that. This app introduces a <b>fair and stress-free bill splitting solution</b> that handles service charges, calculates exact individual shares, and eliminates group chat awkwardness completely.</p>
         </div>
 
+        <!-- Dynamic Counter Display Box -->
+        <div class="counter-box">
+            <span>📊 Total Bill Splits Calculated (Global):</span>
+            <span id="globalCalcCounter" style="font-size: 1.1em; color: var(--primary-hover);">0</span>
+        </div>
+
         <div class="changelog-box">
             <div class="changelog-header-container">
                 <h3>🚀 What's New!</h3>
-                <div class="version-stamp">version 1.08 | Last updated: 4th July 2026</div>
+                <div class="version-stamp">version 1.09 | Last updated: 4th July 2026</div>
             </div>
             
             <div class="changelog-item">
@@ -246,6 +254,21 @@
     <script>
         let friends = [];
         let qrDataUrl = ""; 
+        
+        // A unique namespace key URL tracking cross-network increments
+        const COUNTAPI_URL = "https://api.countapi.xyz/json/makancalculator_andy";
+
+        // Fetch live global shared database counter on boot load execution
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch(COUNTAPI_URL)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("globalCalcCounter").innerText = data.value;
+                })
+                .catch(() => {
+                    document.getElementById("globalCalcCounter").innerText = localStorage.getItem("makanCalcCount") || 0;
+                });
+        });
 
         function startApp() {
             document.getElementById('landingPage').style.display = 'none';
@@ -279,14 +302,13 @@
             let foundItems = false;
 
             lines.forEach(line => {
-                // Captures text line structures ending with dynamic money decimals (e.g., Burger 18.50 or Chicken Chop RM24.00)
                 const priceMatch = line.match(/(.+?)\s+(?:RM\s*)?(\d+\.\d{2})\s*$/i);
                 if (priceMatch) {
                     if (!foundItems) {
-                        container.innerHTML = ""; // Clear default initial card placeholder block
+                        container.innerHTML = ""; 
                         foundItems = true;
                     }
-                    const itemName = priceMatch[1].replace(/[\d\.\*]/g, '').trim();
+                    const itemName = priceMatch[1].replace(/[\d.*]/g, '').trim();
                     const itemPrice = parseFloat(priceMatch[2]);
                     
                     if (itemName.length > 2 && itemPrice > 0) {
@@ -407,7 +429,7 @@
             entryCard.innerHTML = `
                 <div class="item-inputs">
                     <div class="desc-input-box">
-                        <input type="text" class="item-desc" placeholder="Item Name (e.g. Grilled Chicken Chop">
+                        <input type="text" class="item-desc" placeholder="Item Name (e.g. Grilled Chicken Chop)">
                     </div>
                     <div class="price-container">
                         <span style="font-size:0.9em; font-weight:bold; color:#64748b; padding-right:4px;">RM</span>
@@ -518,6 +540,18 @@
                     receiptItemsLogged.push({ desc: itemLabel, price: price, members: sharedWith.join(', ') });
                 }
             });
+
+            // Hit the server database endpoint key to scale +1 increment counter calculation globally
+            fetch(`https://api.countapi.xyz/hit/makancalculator_andy`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("globalCalcCounter").innerText = data.value;
+                })
+                .catch(() => {
+                    let newCalcTotal = parseInt(localStorage.getItem("makanCalcCount") || 0) + 1;
+                    localStorage.setItem("makanCalcCount", newCalcTotal);
+                    document.getElementById("globalCalcCounter").innerText = newCalcTotal;
+                });
 
             const totalService = overallSubtotal * servicePct;
             const totalTax = overallSubtotal * taxPct;
