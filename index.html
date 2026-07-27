@@ -160,7 +160,7 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 1.36 | Last updated: 28th July 2026</span>
+                <span class="version-stamp">version 1.37 | Last updated: 28th July 2026</span>
             </div>
             
             <div class="feature-item">
@@ -308,20 +308,23 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Data = e.target.result.split(',')[1];
-                callGeminiVisionWithFallback(base64Data, apiKey);
+                callGeminiVisionUniversal(base64Data, apiKey);
             };
             reader.readAsDataURL(file);
         }
 
-        async function callGeminiVisionWithFallback(base64Image, apiKey) {
+        async function callGeminiVisionUniversal(base64Image, apiKey) {
             const scanBtn = document.getElementById("scanBtn");
-            const modelsToTry = [
-                "gemini-1.5-flash-latest",
-                "gemini-1.5-flash",
-                "gemini-1.5-pro"
+            
+            // List of target endpoint combinations to cycle through
+            const endpointTargets = [
+                { ver: "v1beta", model: "gemini-1.5-flash" },
+                { ver: "v1", model: "gemini-1.5-flash" },
+                { ver: "v1beta", model: "gemini-2.0-flash" },
+                { ver: "v1beta", model: "gemini-1.5-flash-8b" }
             ];
 
-            const promptText = `Analyze this receipt image. Read every item name and its price. Output strict JSON format with key "items" as an array of objects containing "name" (string) and "price" (number), "serviceChargePct" (number or null), and "taxPct" (number or null). Return raw JSON string only.`;
+            const promptText = `Analyze this receipt image. Read every item name and price. Output ONLY a valid JSON object with key "items" as an array of objects containing "name" (string) and "price" (number), "serviceChargePct" (number or null), and "taxPct" (number or null). No markdown formatting.`;
 
             const payload = {
                 contents: [{
@@ -332,11 +335,11 @@
                 }]
             };
 
-            let lastErrorMessage = "";
+            let lastErr = "";
 
-            for (const model of modelsToTry) {
+            for (const target of endpointTargets) {
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    const url = `https://generativelanguage.googleapis.com/${target.ver}/models/${target.model}:generateContent?key=${apiKey}`;
                     
                     const response = await fetch(url, {
                         method: "POST",
@@ -346,8 +349,8 @@
 
                     if (!response.ok) {
                         const errObj = await response.json();
-                        lastErrorMessage = errObj.error?.message || `HTTP ${response.status}`;
-                        continue; // try next model
+                        lastErr = errObj.error?.message || `HTTP ${response.status}`;
+                        continue; // try next endpoint combination
                     }
 
                     const data = await response.json();
@@ -374,14 +377,14 @@
                         alert(`✨ Successfully loaded ${parsed.items.length} items from receipt!`);
                         scanBtn.innerText = "📷 Take / Upload Receipt Photo";
                         scanBtn.disabled = false;
-                        return; // success!
+                        return; // Done!
                     }
                 } catch (err) {
-                    lastErrorMessage = err.message;
+                    lastErr = err.message;
                 }
             }
 
-            alert(`Error reading receipt: ${lastErrorMessage}`);
+            alert(`Error reading receipt: ${lastErr}\n\nTip: Make sure "Generative Language API" is active on your Google AI Studio key.`);
             scanBtn.innerText = "📷 Take / Upload Receipt Photo";
             scanBtn.disabled = false;
         }
