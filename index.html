@@ -159,12 +159,12 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 2.10 | Powered by OCR.Space Engine</span>
+                <span class="version-stamp">version 2.11 | OCR Engine 2 Active</span>
             </div>
             
             <div class="feature-item">
-                <div class="feature-title">⚡ High Accuracy OCR Receipt Auto-Fill</div>
-                <div class="feature-desc">Scan any receipt photo powered by OCR.Space engine. Automatically extracts item names and prices seamlessly with zero setup required!</div>
+                <div class="feature-title">⚡ High Accuracy OCR Engine 2 Auto-Fill</div>
+                <div class="feature-desc">Scan any receipt photo using OCR.Space Engine 2 specialized for receipts and multi-column tables. Zero setup required!</div>
             </div>
 
             <div class="feature-item">
@@ -279,15 +279,16 @@
             if (!file) return;
 
             const scanBtn = document.getElementById("scanBtn");
-            scanBtn.innerText = "⏳ OCR Reading Receipt...";
+            scanBtn.innerText = "⏳ OCR Engine 2 Parsing...";
             scanBtn.disabled = true;
 
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("apikey", "helloworld"); // Free built-in public key
+            formData.append("apikey", "helloworld");
             formData.append("language", "eng");
             formData.append("isTable", "true");
             formData.append("scale", "true");
+            formData.append("engine", "2"); // Engine 2 is much more accurate for receipts/tables
 
             try {
                 const response = await fetch("https://api.ocr.space/parse/image", {
@@ -314,7 +315,7 @@
                     const cleanLine = line.trim();
                     if (!cleanLine) return;
 
-                    // Match prices ending with numeric/decimal like "12.50" or "RM 12.50"
+                    // Match line-item prices ending with decimals like 12.50 or 3.00
                     const priceMatch = cleanLine.match(/(?:RM|MYR|\$)?\s*(\d+[\.,]\d{2})\s*$/i);
                     if (priceMatch) {
                         const rawPrice = priceMatch[1].replace(',', '.');
@@ -322,8 +323,16 @@
                         let nameVal = cleanLine.replace(priceMatch[0], '').replace(/(?:RM|MYR|\$)/gi, '').trim();
 
                         const lowerName = nameVal.toLowerCase();
-                        // Ignore header/footer items like Total, Cash, Change, Subtotal, Taxes
-                        if (priceVal > 0 && nameVal.length > 1 && !lowerName.includes('total') && !lowerName.includes('change') && !lowerName.includes('cash') && !lowerName.includes('subtotal') && !lowerName.includes('tax') && !lowerName.includes('rounding')) {
+                        // Ignore summary keywords
+                        if (priceVal > 0 && nameVal.length > 1 && 
+                            !lowerName.includes('total') && 
+                            !lowerName.includes('change') && 
+                            !lowerName.includes('cash') && 
+                            !lowerName.includes('subtotal') && 
+                            !lowerName.includes('tax') && 
+                            !lowerName.includes('rounding') &&
+                            !lowerName.includes('service') &&
+                            !lowerName.includes('sst')) {
                             foundItems.push({ name: nameVal, price: priceVal });
                         }
                     }
@@ -337,13 +346,13 @@
                         addItemRowWithValue(item.name, item.price);
                     });
                     
-                    alert(`✨ Successfully parsed ${foundItems.length} items from receipt!`);
+                    alert(`✨ Successfully parsed ${foundItems.length} items from receipt with Engine 2!`);
                 } else {
                     alert("No clear item lines detected. You can manually enter items below.");
                 }
             } catch (err) {
                 console.error(err);
-                alert(`Scan failed: ${err.message}. Please try taking a clearer photo with good lighting.`);
+                alert(`Scan failed: ${err.message}. Please try taking a clearer photo.`);
             } finally {
                 scanBtn.innerText = "📷 Take / Upload Receipt Photo";
                 scanBtn.disabled = false;
