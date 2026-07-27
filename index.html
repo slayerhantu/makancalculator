@@ -160,7 +160,7 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 1.35 | Last updated: 28th July 2026</span>
+                <span class="version-stamp">version 1.36 | Last updated: 28th July 2026</span>
             </div>
             
             <div class="feature-item">
@@ -308,14 +308,18 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64Data = e.target.result.split(',')[1];
-                callGeminiVision(base64Data, apiKey);
+                callGeminiVisionWithFallback(base64Data, apiKey);
             };
             reader.readAsDataURL(file);
         }
 
-        async function callGeminiVision(base64Image, apiKey) {
+        async function callGeminiVisionWithFallback(base64Image, apiKey) {
             const scanBtn = document.getElementById("scanBtn");
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const modelsToTry = [
+                "gemini-1.5-flash-latest",
+                "gemini-1.5-flash",
+                "gemini-1.5-pro"
+            ];
 
             const promptText = `Analyze this receipt image. Read every item name and its price. Output strict JSON format with key "items" as an array of objects containing "name" (string) and "price" (number), "serviceChargePct" (number or null), and "taxPct" (number or null). Return raw JSON string only.`;
 
@@ -328,52 +332,58 @@
                 }]
             };
 
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
+            let lastErrorMessage = "";
 
-                if (!response.ok) {
-                    const errObj = await response.json();
-                    throw new Error(errObj.error?.message || `HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                let rawText = data.candidates[0].content.parts[0].text.trim();
-                
-                // Clean markdown codeblocks if returned
-                rawText = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/, "").trim();
-                
-                const parsed = JSON.parse(rawText);
-
-                if (parsed.items && parsed.items.length > 0) {
-                    const container = document.getElementById("itemsContainer");
-                    container.innerHTML = ""; // Clear existing empty rows
+            for (const model of modelsToTry) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
                     
-                    parsed.items.forEach(item => {
-                        addItemRowWithValue(item.name, item.price);
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
                     });
 
-                    if (parsed.serviceChargePct !== null && parsed.serviceChargePct !== undefined) {
-                        document.getElementById("servicePct").value = parsed.serviceChargePct;
+                    if (!response.ok) {
+                        const errObj = await response.json();
+                        lastErrorMessage = errObj.error?.message || `HTTP ${response.status}`;
+                        continue; // try next model
                     }
-                    if (parsed.taxPct !== null && parsed.taxPct !== undefined) {
-                        document.getElementById("taxPct").value = parsed.taxPct;
-                    }
+
+                    const data = await response.json();
+                    let rawText = data.candidates[0].content.parts[0].text.trim();
                     
-                    alert(`✨ Successfully loaded ${parsed.items.length} items from receipt!`);
-                } else {
-                    alert("No distinct item rows detected in receipt photo.");
+                    rawText = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/, "").trim();
+                    const parsed = JSON.parse(rawText);
+
+                    if (parsed.items && parsed.items.length > 0) {
+                        const container = document.getElementById("itemsContainer");
+                        container.innerHTML = ""; 
+                        
+                        parsed.items.forEach(item => {
+                            addItemRowWithValue(item.name, item.price);
+                        });
+
+                        if (parsed.serviceChargePct !== null && parsed.serviceChargePct !== undefined) {
+                            document.getElementById("servicePct").value = parsed.serviceChargePct;
+                        }
+                        if (parsed.taxPct !== null && parsed.taxPct !== undefined) {
+                            document.getElementById("taxPct").value = parsed.taxPct;
+                        }
+                        
+                        alert(`✨ Successfully loaded ${parsed.items.length} items from receipt!`);
+                        scanBtn.innerText = "📷 Take / Upload Receipt Photo";
+                        scanBtn.disabled = false;
+                        return; // success!
+                    }
+                } catch (err) {
+                    lastErrorMessage = err.message;
                 }
-            } catch (err) {
-                console.error(err);
-                alert(`Error reading receipt: ${err.message}`);
-            } finally {
-                scanBtn.innerText = "📷 Take / Upload Receipt Photo";
-                scanBtn.disabled = false;
             }
+
+            alert(`Error reading receipt: ${lastErrorMessage}`);
+            scanBtn.innerText = "📷 Take / Upload Receipt Photo";
+            scanBtn.disabled = false;
         }
 
         function addItemRowWithValue(descName, priceVal) {
