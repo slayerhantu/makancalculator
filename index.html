@@ -160,7 +160,7 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 1.33 | Last updated: 28th July 2026</span>
+                <span class="version-stamp">version 1.34 | Last updated: 28th July 2026</span>
             </div>
             
             <div class="feature-item">
@@ -315,14 +315,9 @@
 
         async function callGeminiVision(base64Image, apiKey) {
             const scanBtn = document.getElementById("scanBtn");
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-            const promptText = `Analyze this receipt image and return ONLY a raw JSON object with NO markdown, NO code blocks, and NO extra text. Format:
-{
-  "items": [{"name": "Item Description", "price": 12.50}],
-  "serviceChargePct": 10,
-  "taxPct": 6
-}`;
+            const promptText = `Analyze this receipt image. Read every item name and its price. Output strict JSON with key "items" as an array of objects containing "name" (string) and "price" (number), "serviceChargePct" (number or null), and "taxPct" (number or null).`;
 
             const payload = {
                 contents: [{
@@ -330,7 +325,10 @@
                         { text: promptText },
                         { inline_data: { mime_type: "image/jpeg", data: base64Image } }
                     ]
-                }]
+                }],
+                generationConfig: {
+                    response_mime_type: "application/json"
+                }
             };
 
             try {
@@ -340,8 +338,13 @@
                     body: JSON.stringify(payload)
                 });
 
+                if (!response.ok) {
+                    const errObj = await response.json();
+                    throw new Error(errObj.error?.message || `HTTP ${response.status}`);
+                }
+
                 const data = await response.json();
-                const rawText = data.candidates[0].content.parts[0].text.replace(/```json/g, "").replace(/```/g, "").trim();
+                const rawText = data.candidates[0].content.parts[0].text.trim();
                 const parsed = JSON.parse(rawText);
 
                 if (parsed.items && parsed.items.length > 0) {
@@ -352,14 +355,20 @@
                         addItemRowWithValue(item.name, item.price);
                     });
 
-                    if (parsed.serviceChargePct !== undefined) document.getElementById("servicePct").value = parsed.serviceChargePct;
-                    if (parsed.taxPct !== undefined) document.getElementById("taxPct").value = parsed.taxPct;
+                    if (parsed.serviceChargePct !== null && parsed.serviceChargePct !== undefined) {
+                        document.getElementById("servicePct").value = parsed.serviceChargePct;
+                    }
+                    if (parsed.taxPct !== null && parsed.taxPct !== undefined) {
+                        document.getElementById("taxPct").value = parsed.taxPct;
+                    }
                     
                     alert(`✨ Successfully loaded ${parsed.items.length} items from receipt!`);
+                } else {
+                    alert("No distinct item rows detected in receipt photo.");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Failed to parse receipt. Please check your API key or try a clearer picture.");
+                alert(`Error reading receipt: ${err.message}`);
             } finally {
                 scanBtn.innerText = "📷 Take / Upload Receipt Photo";
                 scanBtn.disabled = false;
