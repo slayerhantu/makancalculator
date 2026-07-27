@@ -155,7 +155,7 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 3.00 | Local Canvas Binarized OCR</span>
+                <span class="version-stamp">version 3.10 | Smart Text Sanitizer</span>
             </div>
             
             <div class="feature-item">
@@ -288,11 +288,10 @@
             // Grayscale & Thresholding
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                // Thresholding filter to pop out faint thermal text
                 const v = avg < 140 ? 0 : 255;
-                data[i] = v;     // R
-                data[i + 1] = v; // G
-                data[i + 2] = v; // B
+                data[i] = v;     
+                data[i + 1] = v; 
+                data[i + 2] = v; 
             }
             ctx.putImageData(imgData, 0, 0);
             return canvas;
@@ -322,18 +321,19 @@
                         const cleanLine = line.trim();
                         if (!cleanLine) return;
 
-                        // Match line items with numeric prices (e.g. 12.50, RM 12.50, $12.50)
                         const priceMatch = cleanLine.match(/(?:RM|MYR|\$)?\s*(\d+[\.,]\d{2})\s*$/i);
                         if (priceMatch) {
                             const rawPrice = priceMatch[1].replace(',', '.');
                             const priceVal = parseFloat(rawPrice);
                             let nameVal = cleanLine.replace(priceMatch[0], '').replace(/(?:RM|MYR|\$)/gi, '').trim();
 
-                            // Clean quantity prefixes like "1 x", "2x"
-                            nameVal = nameVal.replace(/^\d+\s*[xX*]?\s*/, '').trim();
+                            // Strip item item-code prefixes, brackets, and extra non-alphanumeric noise
+                            nameVal = nameVal.replace(/^\d+\s*[xX*]?\s*/, '');
+                            nameVal = nameVal.replace(/^[^a-zA-Z0-9]+/, '');
+                            nameVal = nameVal.replace(/[^a-zA-Z0-9\s\-\/\(\)]/g, ' ').replace(/\s+/g, ' ').trim();
 
                             const lowerName = nameVal.toLowerCase();
-                            if (priceVal > 0 && nameVal.length > 1 && 
+                            if (priceVal > 0 && nameVal.length > 2 && 
                                 !lowerName.includes('total') && 
                                 !lowerName.includes('change') && 
                                 !lowerName.includes('cash') && 
