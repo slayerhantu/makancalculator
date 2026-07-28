@@ -42,8 +42,6 @@
         .story-box p { margin: 0 0 12px 0; }
         .story-box p:last-child { margin-bottom: 0; }
 
-        .counter-box { background: #fffde7; border: 1px dashed #fbc02d; padding: 12px 18px; border-radius: 8px; font-size: 0.95em; color: #5d4037; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        
         .features-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .features-header-container { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; }
         .features-box h3 { margin-bottom: 4px; font-size: 1.2em; }
@@ -72,11 +70,14 @@
         }
 
         .item-entry-row { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-        .item-inputs { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; }
-        .item-inputs .desc-input-box { flex: 1.5; }
-        .item-inputs .price-container { flex: 1; display: flex; align-items: center; background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding-left: 12px; }
+        .item-inputs { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+        .item-inputs .desc-input-box { flex: 1.5; min-width: 180px; }
+        .item-inputs .price-container { flex: 1; min-width: 130px; display: flex; align-items: center; background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding-left: 12px; }
         .item-inputs .price-container input { border: none; background: transparent; padding: 12px 12px 12px 4px; }
         
+        .alcohol-tag-container { display: flex; align-items: center; gap: 6px; background: #fff5f5; border: 1px solid #feb2b2; padding: 8px 12px; border-radius: 8px; font-size: 0.85em; font-weight: 600; color: #c53030; cursor: pointer; user-select: none; }
+        .alcohol-tag-container input { width: auto; margin: 0; cursor: pointer; }
+
         .friend-checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px dashed var(--border); padding-top: 12px; }
         .friend-checkbox-label { display: inline-flex; align-items: center; background: white; border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 0.88em; transition: all 0.15s; font-weight: 500; }
         .friend-checkbox-label input { width: 0; height: 0; opacity: 0; margin: 0; position: absolute; }
@@ -144,9 +145,14 @@
         <div class="features-box">
             <div class="features-header-container">
                 <h3>✨ Features You'll Love</h3>
-                <span class="version-stamp">version 5.14 | Clean Manual Entry</span>
+                <span class="version-stamp">version 5.15 | Custom Alcoholic SST Support</span>
             </div>
             
+            <div class="feature-item">
+                <div class="feature-title">🍺 Alcohol (8% SST) Tagging</div>
+                <div class="feature-desc">Tag individual alcoholic drinks so they accurately receive 8% SST while keeping other items on standard tax.</div>
+            </div>
+
             <div class="feature-item">
                 <div class="feature-title">🛡️ Smart Tax & Service Charge Splitting</div>
                 <div class="feature-desc">Automatically tracks and factors in individual service charges and government taxes proportional to what each person ordered.</div>
@@ -216,7 +222,7 @@
                     <input type="number" id="servicePct" value="10">
                 </div>
                 <div>
-                    <label>SST (%)</label>
+                    <label>Default SST (%) <span style="font-size:0.8em; font-weight:normal; color:#64748b;">(For non-alcoholic items)</span></label>
                     <input type="number" id="taxPct" value="6">
                 </div>
             </div>
@@ -333,6 +339,9 @@
                         <span style="font-size:0.9em; font-weight:bold; color:#64748b; padding-right:4px;">RM</span>
                         <input type="number" step="0.01" class="item-price" value="${priceVal}" placeholder="0.00">
                     </div>
+                    <label class="alcohol-tag-container">
+                        <input type="checkbox" class="item-alcohol"> 🍺 Alcohol (8% SST)
+                    </label>
                 </div>
                 <div style="font-size:0.8em; font-weight:600; color:#4a5568; margin-bottom:6px;">Shared By:</div>
                 <div class="friend-checkbox-group">
@@ -402,28 +411,41 @@
             
             const billDesc = document.getElementById('billDesc').value.trim() || "Makan Breakdown";
             const servicePct = (parseFloat(document.getElementById('servicePct').value) || 0) / 100;
-            const taxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
+            const defaultTaxPct = (parseFloat(document.getElementById('taxPct').value) || 0) / 100;
             
             const descs = document.querySelectorAll('.item-desc');
             const prices = document.querySelectorAll('.item-price');
+            const alcoholChecks = document.querySelectorAll('.item-alcohol');
             
             let personalSubtotals = {};
+            let personalTaxes = {};
             let personalItems = {};
             
             friends.forEach(f => {
                 personalSubtotals[f] = 0;
+                personalTaxes[f] = 0;
                 personalItems[f] = [];
             });
             
             let overallSubtotal = 0;
+            let totalTaxOverall = 0;
             let receiptItemsLogged = []; 
             
             descs.forEach((node, rowIndex) => {
-                const itemLabel = node.value.trim() || `Item #${rowIndex + 1}`;
+                let itemLabel = node.value.trim() || `Item #${rowIndex + 1}`;
                 const price = parseFloat(prices[rowIndex].value) || 0;
                 if (price <= 0) return;
                 
+                const isAlcohol = alcoholChecks[rowIndex] && alcoholChecks[rowIndex].checked;
+                const appliedTaxPct = isAlcohol ? 0.08 : defaultTaxPct;
+                
+                if (isAlcohol) {
+                    itemLabel += " 🍺";
+                }
+
                 overallSubtotal += price;
+                const itemTax = price * appliedTaxPct;
+                totalTaxOverall += itemTax;
                 
                 let sharedWith = [];
                 friends.forEach((friend, fIndex) => {
@@ -435,8 +457,10 @@
                 
                 if (sharedWith.length > 0) {
                     const splitPrice = price / sharedWith.length;
+                    const splitTax = itemTax / sharedWith.length;
                     sharedWith.forEach(friend => {
                         personalSubtotals[friend] += splitPrice;
+                        personalTaxes[friend] += splitTax;
                         personalItems[friend].push(itemLabel);
                     });
                     receiptItemsLogged.push({ desc: itemLabel, price: price, members: sharedWith.join(', ') });
@@ -444,8 +468,7 @@
             });
 
             const totalService = overallSubtotal * servicePct;
-            const totalTax = overallSubtotal * taxPct;
-            const grandTotal = overallSubtotal + totalService + totalTax;
+            const grandTotal = overallSubtotal + totalService + totalTaxOverall;
 
             let resultsHtml = `<div id="printArea">`;
             resultsHtml += `<h2 style="text-align: center; font-size: 1.8em; margin-bottom: 4px; font-weight: 800; border-bottom: 3px solid var(--dark); padding-bottom: 10px;">🧾 ${billDesc}</h2>`;
@@ -468,7 +491,7 @@
             resultsHtml += `<div class="table-responsive"><h3>📊 Total Bill</h3><table><thead><tr><th>Summary Metric</th><th>Amount</th></tr></thead><tbody>`;
             resultsHtml += `<tr><td>Subtotal</td><td><b>MYR ${overallSubtotal.toFixed(2)}</b></td></tr>`;
             resultsHtml += `<tr><td>Service Charge (${document.getElementById('servicePct').value}%)</td><td>MYR ${totalService.toFixed(2)}</td></tr>`;
-            resultsHtml += `<tr><td>SST (${document.getElementById('taxPct').value}%)</td><td>MYR ${totalTax.toFixed(2)}</td></tr>`;
+            resultsHtml += `<tr><td>Total SST (Default/Alcohol)</td><td>MYR ${totalTaxOverall.toFixed(2)}</td></tr>`;
             resultsHtml += `<tr style="font-weight: bold; background: #e2f0d9; border-top: 2px solid #000;"><td>Total To Pay</td><td style="font-size: 1.2em;">MYR ${grandTotal.toFixed(2)}</td></tr></tbody></table></div>`;
             resultsHtml += `</div>`; 
 
@@ -479,7 +502,7 @@
             friends.forEach(friend => {
                 const sub = personalSubtotals[friend];
                 const sCharge = sub * servicePct;
-                const tax = sub * taxPct;
+                const tax = personalTaxes[friend];
                 const finalPersonalTotal = sub + sCharge + tax;
                 const itemsListString = personalItems[friend].length > 0 ? personalItems[friend].join(', ') : 'None';
                 
